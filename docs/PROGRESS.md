@@ -35,12 +35,22 @@
 - Catatan: semua D-xx masih USULAN; kontrak belum dibekukan.
 
 ### 2026-11-08 · Backend P0 (migration + model)
+
 - AI: Claude · Fase: P0
 - Selesai: 16 migration (migrate:fresh hijau), 14 model + relasi, config/marketplace.php.
 - Setengah jadi: seeder demo (MasterDataSeeder, DemoAccountSeeder) kode ada, belum dijalankan.
 - Keputusan baru: Laravel 10 dipasang pakai --no-security-blocking (EOL, demo lokal saja).
 - Bug diketahui: (kosong)
 - Berikutnya: 1) Seeder + tes tinker. 2) Contoh JSON API_CONTRACT (Auth, Katalog, Quote). 3) Skeleton Flutter.
+
+### 2026-11-09 · P1 Auth + Katalog + Quote (backend selesai)
+
+- AI: Claude · Fase: P1
+- Selesai: auth (register customer/mitra, login, logout, me; error 401/403/422 dites), katalog publik, PricingService + /orders/quote (dites: 270000, 422 kombinasi tanpa harga, 422 add-on jasa lain). 10 route api.
+- Setengah jadi: tes 429 + logout (opsional), contoh JSON kontrak (ditempel di §10), skeleton Flutter.
+- Keputusan baru: register mengembalikan token; admin ditolak login API; kombinasi jasa+ukuran tanpa harga = 422; error field bersarang berformat bertitik.
+- CHANGE REQUEST tertunda: G-01, G-02; penyeragaman nama field (name vs service_name/size_name).
+- Berikutnya: 1) Skeleton Flutter (packages/core, ApiClient, UserInfo). 2) P2: slots + POST /orders. 3) Tanya dosen Q-1.
 
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat

@@ -28,6 +28,10 @@ class Order extends Model
         'total_price',
         'order_status',
         'customer_note',
+        'cancelled_at',
+        'cancel_reason',
+        'cancelled_by',         // customer | mitra | admin | system
+        'completed_at',
     ];
 
     protected $casts = [
@@ -36,6 +40,8 @@ class Order extends Model
         'service_price' => 'integer',
         'addons_total' => 'integer',
         'total_price' => 'integer',
+        'cancelled_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo

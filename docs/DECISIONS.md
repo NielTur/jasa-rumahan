@@ -70,3 +70,21 @@ Cek ke **dosen** dan **kelompok** secepatnya; jawabannya mengubah rencana.
 - **Pemicu Plan B:** jika akhir minggu ke-2 alur *buat order → mitra accept* belum jalan end-to-end di backend, aktifkan mode mock di Flutter (F-10) untuk menyelesaikan seluruh UI, dan demokan backend sebisanya.
 - **Pemicu pemangkasan:** jika Midtrans sandbox + webhook belum stabil di hari ke-3 minggu ke-3, pakai fallback Status API. Jika masih belum, demo pembayaran memakai Midtrans Payment Simulator dan/atau `simulate-paid` (dev), dan tulis jujur di dokumen.
 - **Urutan prioritas fitur** bila waktu mepet: (1) auth + katalog, (2) buat order + harga server, (3) mitra accept + progres status, (4) bayar Midtrans, (5) admin CRUD katalog/harga, (6) konfirmasi selesai, (7) guest tracking. Jangan mengorbankan (1)-(3) demi (4).
+
+
+## 5. Log perubahan (CHANGE REQUEST)
+
+Perubahan terhadap dokumen desain, skema, atau kontrak. Status: DISETUJUI = sudah masuk kode, USULAN = menunggu kelompok.
+
+| ID | Tanggal | Area | Perubahan | Alasan | Status |
+|---|---|---|---|---|---|
+| CR-01 | 2026-11-09 | Skema `orders` (G-01) | Tambah `cancelled_at`, `cancel_reason`, `cancelled_by`, `completed_at` lewat migration baru | Tanpa ini tidak ada catatan siapa/kapan/kenapa batal, dan auto-complete (D-07) tidak punya waktu acuan | DISETUJUI (pemilik proyek) |
+| CR-02 | 2026-11-09 | Skema `payments` (G-02) | Tambah `gateway_payload` (JSON), `refund_amount`, `refunded_at` lewat migration baru | AI_RULES B-7 mewajibkan payload mentah webhook disimpan, dan D-08 butuh catatan refund | DISETUJUI (pemilik proyek) |
+| CR-03 | 2026-11-09 | Kontrak §4 objek Order | `service.name` jadi `service.service_name`, `property_size.name` jadi `property_size.size_name` | Seragam dengan katalog yang sudah jalan dan nama kolom DB | DISETUJUI |
+| CR-04 | 2026-11-09 | Kontrak §2 Auth | Register customer/mitra mengembalikan `token` + `user` (201). Mitra punya `mitra_id` di `user` dan di level `data` | Aplikasi tidak perlu login ulang setelah daftar | DISETUJUI |
+| CR-05 | 2026-11-09 | Kontrak §2 Auth | Akun `admin` ditolak login lewat API (403) | Admin memakai Blade (G-04) | DISETUJUI |
+| CR-06 | 2026-11-09 | Kontrak §1 | Key `errors` untuk field bersarang berbentuk datar bertitik, contoh `"address.label"` | Perilaku bawaan validator Laravel | DISETUJUI |
+| CR-07 | 2026-11-09 | Dokumen desain §13 `users` | Migration `users` bawaan Laravel diganti sesuai desain; `password_reset_tokens` dihapus | Login memakai telepon, tidak ada reset lewat email | DISETUJUI |
+| CR-08 | 2026-11-08 | Stack | Laravel 10.50.4 (bukan 12), dipasang dengan `--no-security-blocking`; `policy.advisories.block=false` di `composer.json` | Laravel 10 sudah EOL. Hanya untuk demo lokal dan Sandbox, jangan di-deploy publik | DISETUJUI |
+
+Parameter D-xx yang sudah dipakai di kode: D-01, D-09, D-10 (belum), D-14, D-15, D-17. Statusnya di §1 tetap USULAN sampai kelompok mengubahnya.
