@@ -20,6 +20,7 @@ class OrderService
         private PricingService $pricing,
         private SchedulingService $scheduling,
         private OrderStatusService $status,
+        private MatchingService $matching,
     ) {
     }
 
@@ -80,7 +81,7 @@ class OrderService
                 throw new ApiException('Pesanan yang sama sudah dibuat. Cek lewat menu Lacak Pesanan.', 409);
             }
 
-            return DB::transaction(function () use ($data, $user, $addressId, $quote, $start) {
+            $order = DB::transaction(function () use ($data, $user, $addressId, $quote, $start) {
                 $order = Order::create([
                     'order_code' => $this->generateOrderCode(),
                     'customer_id' => $user?->id,
@@ -116,9 +117,11 @@ class OrderService
                 $this->status->logCreated($order, $user);
                 $this->status->transition($order, OrderStatus::SEARCHING_MITRA, null, 'Mencari mitra.', 'system');
 
-                // Muat ulang supaya status terbaru ikut
                 return $order->fresh();
             });
+
+            // Tawarkan ke mitra pertama (attempt #1), di luar transaksi pembuatan order
+            return $this->matching->advance($order);
         } finally {
             $lock->release();
         }

@@ -60,6 +60,15 @@
 - Keputusan baru: CR-01..CR-08 disetujui.
 - Berikutnya: 1) P2a: OrderStatusService + slots + POST /orders. 2) Daftar Midtrans Sandbox. 3) Tanya dosen Q-1.
 
+### 2026-11-09 · P2b matching
+
+- AI: Claude · Fase: P2
+- Selesai: P2a hijau semua (slot, order guest/login, anti-dobel, track + 429, riwayat). P2b: MatchingService (attempt sekuensial, D-16), command orders:process-expired-offers + scheduler tiap menit, lazy expiry di endpoint baca. Hasil tes: <isi>.
+- Setengah jadi: accept/reject mitra (P3) belum ada, jadi order baru berhenti di offer. Reject nanti memanggil MatchingService::advance().
+- Keputusan baru: tidak ada CR baru. D-04, D-05, D-16 sudah terpakai di kode. Attempt `offered` pada order yang sudah tidak mencari mitra ditutup `expired`.
+- Bug diketahui: (kosong)
+- Berikutnya: 1) P3: profil mitra, pilih jasa, jadwal, offers accept/reject (B-5 lockForUpdate + tes bersamaan), progres status, simulate-paid. 2) Daftar Midtrans Sandbox. 3) Tanya dosen Q-1.
+
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>

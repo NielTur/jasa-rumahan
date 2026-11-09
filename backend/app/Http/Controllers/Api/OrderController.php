@@ -8,6 +8,7 @@ use App\Http\Requests\CreateOrderRequest;
 use App\Http\Requests\TrackOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\MatchingService;
 use App\Services\OrderAccessService;
 use App\Services\OrderService;
 use App\Support\ApiResponse;
@@ -19,6 +20,7 @@ class OrderController extends Controller
     public function __construct(
         private OrderService $orders,
         private OrderAccessService $access,
+        private MatchingService $matching,
     ) {
     }
 
@@ -43,6 +45,7 @@ class OrderController extends Controller
             $request->user('sanctum'),
             $request->input('phone')
         );
+        $order = $this->matching->refreshIfSearching($order); // lazy expiry (B-15)
 
         return ApiResponse::success((new OrderResource($order))->resolve());
     }
@@ -57,6 +60,7 @@ class OrderController extends Controller
         if (!$order) {
             throw new ApiException('Pesanan tidak ditemukan.', 404);
         }
+        $order = $this->matching->refreshIfSearching($order);
 
         return ApiResponse::success((new OrderResource($order))->resolve());
     }
@@ -67,9 +71,17 @@ class OrderController extends Controller
         $perPage = min(max($request->integer('per_page', 15), 1), 50);
 
         $page = Order::where('customer_id', $request->user()->id)
-            ->with(['service', 'propertySize', 'addons', 'mitra.user', 'payments'])
             ->orderByDesc('id')
             ->paginate($perPage);
+
+        // Lazy expiry untuk order yang masih mencari mitra, lalu muat relasi untuk resource
+        $page->setCollection(
+            $page->getCollection()->map(function ($o) {
+                $o = $this->matching->refreshIfSearching($o);
+
+                return $o->load(['service', 'propertySize', 'addons', 'mitra.user', 'payments']);
+            })
+        );
 
         $items = $page->getCollection()
             ->map(fn($o) => (new OrderResource($o))->resolve())
@@ -82,6 +94,7 @@ class OrderController extends Controller
     public function history(Request $request, string $orderCode): JsonResponse
     {
         $order = $this->access->find($orderCode, $request->user('sanctum'), $request->query('phone'));
+        $order = $this->matching->refreshIfSearching($order);
 
         $rows = $order->statusHistories()
             ->orderBy('id')
