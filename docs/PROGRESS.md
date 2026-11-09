@@ -52,6 +52,14 @@
 - CHANGE REQUEST tertunda: G-01, G-02; penyeragaman nama field (name vs service_name/size_name).
 - Berikutnya: 1) Skeleton Flutter (packages/core, ApiClient, UserInfo). 2) P2: slots + POST /orders. 3) Tanya dosen Q-1.
 
+### 2026-11-09 · CR-01/02 + log perubahan
+
+- AI: Claude · Fase: P1 selesai, masuk P2
+- Selesai: DECISIONS §5 (CR-01..CR-08), migration kolom pembatalan orders + payload/refund payments, model Order/Payment diperbarui, kontrak v0.2 (nama field, contoh JSON §10).
+- Setengah jadi: tes 429 + logout (opsional); tes "ubah harga di DB" belum dijalankan.
+- Keputusan baru: CR-01..CR-08 disetujui.
+- Berikutnya: 1) P2a: OrderStatusService + slots + POST /orders. 2) Daftar Midtrans Sandbox. 3) Tanya dosen Q-1.
+
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>
