@@ -34,6 +34,14 @@
 - Selesai: menyusun AI_RULES, PROMPTS, API_CONTRACT (draft v0.1), DECISIONS, README.
 - Catatan: semua D-xx masih USULAN; kontrak belum dibekukan.
 
+### 2026-11-08 · Backend P0 (migration + model)
+- AI: Claude · Fase: P0
+- Selesai: 16 migration (migrate:fresh hijau), 14 model + relasi, config/marketplace.php.
+- Setengah jadi: seeder demo (MasterDataSeeder, DemoAccountSeeder) kode ada, belum dijalankan.
+- Keputusan baru: Laravel 10 dipasang pakai --no-security-blocking (EOL, demo lokal saja).
+- Bug diketahui: (kosong)
+- Berikutnya: 1) Seeder + tes tinker. 2) Contoh JSON API_CONTRACT (Auth, Katalog, Quote). 3) Skeleton Flutter.
+
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>
