@@ -19,6 +19,8 @@ class PropertySize extends Model
     ];
 
     protected $casts = [
+        'min_area' => 'float',
+        'max_area' => 'float',
         'is_active' => 'boolean',
     ];
 

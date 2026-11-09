@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\QuoteController;
 use Illuminate\Support\Facades\Route;
 
 // Semua route di sini otomatis berawalan /api (lihat RouteServiceProvider)
@@ -15,3 +17,11 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
     });
 });
+
+// Katalog publik (guest boleh)
+Route::get('service-categories', [CatalogController::class, 'categories']);
+Route::get('services', [CatalogController::class, 'services']);
+Route::get('services/{id}', [CatalogController::class, 'showService'])->whereNumber('id');
+Route::get('property-types', [CatalogController::class, 'propertyTypes']);
+
+Route::post('orders/quote', [QuoteController::class, 'store']);
