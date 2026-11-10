@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\Mitra\OfferController;
 use App\Http\Controllers\Api\Mitra\OrderController as MitraOrderController;
 use App\Http\Controllers\Api\Mitra\ProfileController;
 use App\Http\Controllers\Api\Mitra\ServiceController;
+use App\Http\Controllers\Api\OrderActionController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\SlotController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +40,10 @@ Route::post('orders/quote', [QuoteController::class, 'store']);
 Route::post('orders', [OrderController::class, 'store'])->middleware('throttle:20,1');
 Route::post('orders/track', [OrderController::class, 'track']);
 Route::get('orders/{order_code}/status-history', [OrderController::class, 'history']);
+// P4a: aksi customer/guest pada satu pesanan (guest kirim phone, akses dicek OrderAccessService)
+Route::post('orders/{order_code}/cancel', [OrderActionController::class, 'cancel']);
+Route::post('orders/{order_code}/confirm-completion', [OrderActionController::class, 'confirmCompletion']);
+Route::get('orders/{order_code}/payment', [PaymentController::class, 'show']);
 
 // Khusus customer login
 Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
