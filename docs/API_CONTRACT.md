@@ -324,3 +324,24 @@ Error bisnis (401, 403, 404, 409, 422 dari service) hanya punya `success` dan `m
 - `quantity` default 1, maksimal 20. `addons` boleh kosong atau dihilangkan.
 - 422 jika: jasa atau ukuran tidak aktif, kombinasi jasa + ukuran tidak punya harga aktif, atau ada add-on yang bukan milik jasa itu.
 - `/orders/quote` tidak menyimpan apa pun.
+
+
+
+### 10.5 Mitra: profil, jasa, jadwal
+
+`GET /mitra/profile`, `PUT /mitra/profile` (body boleh sebagian: `bio`, `service_area`, `is_available`) → 200
+```json
+{ "user_id": 4, "mitra_id": 1, "full_name": "Andi Pratama", "phone": "081200000021",
+  "bio": null, "service_area": null, "verification_status": "approved", "is_available": true }
+```
+
+`GET /mitra/services` → `data: [ { "id": 1, "category_id": 1, "service_name": "Home Cleaning", "description": "...", "duration_minutes": 120, "selected": true } ]`
+`PUT /mitra/services` body `{ "service_ids": [1, 2] }` → bentuk respons sama dengan GET. Array kosong = lepas semua. Jasa nonaktif/tidak ada → 422.
+
+`PUT /mitra/availabilities` (replace-all; array kosong = hapus semua) body:
+```json
+{ "availabilities": [ { "day_of_week": 1, "start_time": "08:00", "end_time": "16:00", "is_active": true } ] }
+```
+→ `data: [ { "id": 7, "day_of_week": 1, "start_time": "08:00", "end_time": "16:00", "is_active": true } ]`
+Aturan: `HH:MM`, selesai > mulai, di dalam jam operasional (08:00-20:00), tidak overlap di hari yang sama (bersentuhan boleh). `is_active` default `true`. `day_of_week`: 0 = Minggu.
+Semua endpoint `/mitra/*` butuh role `mitra`: tanpa token 401, role lain 403.

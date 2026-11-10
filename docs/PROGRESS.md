@@ -85,6 +85,15 @@
 - Versi: PHP 8.3.32, Laravel 10.50.4, Sanctum 3.3.3, Composer 2.11.1, MySQL 8.0.30, Flutter 3.41.6 / Dart 3.11.4
 - Port 3306 sempat diblok Windows. Fix di PowerShell admin: net stop winnat, netsh int ipv4 add excludedportrange protocol=tcp startport=3306 numberofports=1, net start winnat.
 
+### 2026-11-10 · P3a mitra setup (backend, hijau)
+
+- AI: Claude · Fase: P3
+- Selesai: GET/PUT /mitra/profile, /mitra/services, /mitra/availabilities; MitraSetupService; CurrentMitra; phpunit.xml dipaksa ke DB jasa_rumahan_test (MySQL). php artisan test: 12 lulus (10 tes MitraSetupTest). Branch feat/mitra-setup, commit <hash baru setelah amend>.
+- Setengah jadi: P3b offers accept/reject + tes accept bersamaan; P3c order mitra + simulate-paid. Review ChatGPT untuk P3a belum.
+- Keputusan baru: body PUT availabilities dibungkus key `availabilities` (kontrak §10.5 belum ditempel). CR-09..11 sudah di DECISIONS §5.
+- Bug diketahui: (kosong). .phpunit.result.cache sempat ke-commit, sudah dibuang dan di-gitignore.
+- Berikutnya: 1) P3b MitraOfferService (B-5) + tes. 2) P3c. 3) Tanya dosen Q-1.
+
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>

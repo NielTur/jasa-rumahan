@@ -86,5 +86,9 @@ Perubahan terhadap dokumen desain, skema, atau kontrak. Status: DISETUJUI = suda
 | CR-06 | 2026-11-09 | Kontrak §1 | Key `errors` untuk field bersarang berbentuk datar bertitik, contoh `"address.label"` | Perilaku bawaan validator Laravel | DISETUJUI |
 | CR-07 | 2026-11-09 | Dokumen desain §13 `users` | Migration `users` bawaan Laravel diganti sesuai desain; `password_reset_tokens` dihapus | Login memakai telepon, tidak ada reset lewat email | DISETUJUI |
 | CR-08 | 2026-11-08 | Stack | Laravel 10.50.4 (bukan 12), dipasang dengan `--no-security-blocking`; `policy.advisories.block=false` di `composer.json` | Laravel 10 sudah EOL. Hanya untuk demo lokal dan Sandbox, jangan di-deploy publik | DISETUJUI |
+| CR-09 | 2026-11-09 | Kontrak §3 `/slots` | `data` berupa daftar `[ {start, end, available} ]`, bukan objek | Lebih sederhana untuk Flutter | DISETUJUI |
+| CR-10 | 2026-11-09 | D-13 throttle guest | Hanya percobaan gagal yang dihitung, 5 per menit per IP+kode | Polling tracking guest tidak boleh kena 429 | DISETUJUI |
+| CR-11 | 2026-11-09 | Kontrak §4 `POST /orders` | 409 jika slot tanpa mitra eligible atau pesanan identik masih berjalan; 422 jika bukan slot valid atau terlalu dekat | Cegah dobel-tap dan slot kosong | DISETUJUI |
+
 
 Parameter D-xx yang sudah dipakai di kode: D-01, D-09, D-10 (belum), D-14, D-15, D-17. Statusnya di §1 tetap USULAN sampai kelompok mengubahnya.
