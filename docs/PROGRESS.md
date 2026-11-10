@@ -69,6 +69,22 @@
 - Bug diketahui: (kosong)
 - Berikutnya: 1) P3: profil mitra, pilih jasa, jadwal, offers accept/reject (B-5 lockForUpdate + tes bersamaan), progres status, simulate-paid. 2) Daftar Midtrans Sandbox. 3) Tanya dosen Q-1.
 
+### 2026-11-09 · P1 + P2 selesai (backend)
+
+- AI: Claude · Fase: P2 selesai, berikutnya P3
+- Selesai (semua dites hijau, commit 97e25bc):
+  - P1: auth (register/login/logout/me), katalog publik, PricingService + /orders/quote.
+  - P2a: OrderStatusService (satu pintu status), SchedulingService + /slots, POST /orders (guest/login, snapshot, harga server, anti-dobel), track (429 setelah 5 gagal), status-history, customer/orders, middleware role.
+  - P2b: MatchingService (attempt sekuensial D-16), command orders:process-expired-offers + scheduler tiap menit, lazy expiry di endpoint baca.
+  - CR-01 s/d CR-11 tercatat di DECISIONS §5 (CR-01/02 = migration kolom cancel + payload/refund).
+- Setengah jadi: kontrak v0.2, belum dibekukan v1.0. Skeleton Flutter belum ada. Tes otomatis (B-13) belum ada sama sekali.
+- Keputusan baru: tidak ada.
+- Bug diketahui: (kosong)
+- Berikutnya: 1) P3 backend: profil mitra, pilih jasa, jadwal, offers accept/reject (B-5 lockForUpdate + tes accept bersamaan), progres status, dev/simulate-paid. 2) Daftar Midtrans Sandbox. 3) Tanya dosen Q-1.
+- Cara menjalankan: cd backend; php artisan migrate:fresh --seed; php artisan serve --host=0.0.0.0 --port=8000; (terminal lain) php artisan schedule:work
+- Versi: PHP 8.3.32, Laravel 10.50.4, Sanctum 3.3.3, Composer 2.11.1, MySQL 8.0.30, Flutter 3.41.6 / Dart 3.11.4
+- Port 3306 sempat diblok Windows. Fix di PowerShell admin: net stop winnat, netsh int ipv4 add excludedportrange protocol=tcp startport=3306 numberofports=1, net start winnat.
+
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>

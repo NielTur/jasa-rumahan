@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\Mitra\AvailabilityController;
+use App\Http\Controllers\Api\Mitra\ProfileController;
+use App\Http\Controllers\Api\Mitra\ServiceController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\SlotController;
@@ -37,4 +40,16 @@ Route::get('orders/{order_code}/status-history', [OrderController::class, 'histo
 Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
     Route::get('customer/orders', [OrderController::class, 'myOrders']);
     Route::get('orders/{order_code}', [OrderController::class, 'show']);
+});
+
+// Khusus mitra login (P3a: profil, jasa, jadwal. Offers dan order menyusul di P3b/P3c)
+Route::middleware(['auth:sanctum', 'role:mitra'])->prefix('mitra')->group(function () {
+    Route::get('profile', [ProfileController::class, 'show']);
+    Route::put('profile', [ProfileController::class, 'update']);
+
+    Route::get('services', [ServiceController::class, 'index']);
+    Route::put('services', [ServiceController::class, 'update']);
+
+    Route::get('availabilities', [AvailabilityController::class, 'index']);
+    Route::put('availabilities', [AvailabilityController::class, 'update']);
 });
