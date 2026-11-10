@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\Mitra\AvailabilityController;
+use App\Http\Controllers\Api\Mitra\OfferController;
 use App\Http\Controllers\Api\Mitra\ProfileController;
 use App\Http\Controllers\Api\Mitra\ServiceController;
 use App\Http\Controllers\Api\OrderController;
@@ -42,7 +43,7 @@ Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {
     Route::get('orders/{order_code}', [OrderController::class, 'show']);
 });
 
-// Khusus mitra login (P3a: profil, jasa, jadwal. Offers dan order menyusul di P3b/P3c)
+// Khusus mitra login (P3a: profil, jasa, jadwal. P3b: offers. Order mitra menyusul di P3c)
 Route::middleware(['auth:sanctum', 'role:mitra'])->prefix('mitra')->group(function () {
     Route::get('profile', [ProfileController::class, 'show']);
     Route::put('profile', [ProfileController::class, 'update']);
@@ -52,4 +53,8 @@ Route::middleware(['auth:sanctum', 'role:mitra'])->prefix('mitra')->group(functi
 
     Route::get('availabilities', [AvailabilityController::class, 'index']);
     Route::put('availabilities', [AvailabilityController::class, 'update']);
+
+    Route::get('offers', [OfferController::class, 'index']);
+    Route::post('offers/{attempt_id}/accept', [OfferController::class, 'accept'])->whereNumber('attempt_id');
+    Route::post('offers/{attempt_id}/reject', [OfferController::class, 'reject'])->whereNumber('attempt_id');
 });
