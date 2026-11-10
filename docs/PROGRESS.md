@@ -94,6 +94,35 @@
 - Bug diketahui: (kosong). .phpunit.result.cache sempat ke-commit, sudah dibuang dan di-gitignore.
 - Berikutnya: 1) P3b MitraOfferService (B-5) + tes. 2) P3c. 3) Tanya dosen Q-1.
 
+### 2026-11-10 · P3b offers accept/reject (backend)
+
+- AI: Claude · Fase: P3
+- Selesai (belum dijalankan, tunggu hasil tes): GET /mitra/offers, POST accept/reject; MitraOfferService (B-5: kunci order -> mitra_profile -> attempt, re-check status/mitra_id/attempt/expiry/jadwal); MitraOfferResource; MitraOfferTest (12 tes). Branch feat/mitra-offers (ditumpuk di feat/mitra-setup).
+- Setengah jadi: P3c order mitra + simulate-paid. Tes race beneran (dev:race-accept) menyusul setelah P3c. Review ChatGPT belum.
+- Keputusan baru: offer menampilkan expires_at, tanpa order_code (D-12). Accept membalas OrderResource.
+- Bug diketahui: (isi setelah tes)
+- Catatan P4: lihat bawah.
+- Berikutnya: 1) P3c. 2) P4a-c. 3) Tanya dosen Q-1.
+
+### 2026-11-10 · P3b hijau, P3c progres mitra + simulate-paid (backend)
+
+- AI: Claude · Fase: P3
+- Selesai: P3b hijau (php artisan test: 24 lulus, commit 52991be, branch feat/mitra-offers). P3c (belum dijalankan): GET /mitra/orders (+filter status koma), GET /mitra/orders/{kode}, POST depart/arrive/start/finish lewat OrderStatusService (B-4, depart wajib payment paid); POST /dev/orders/{kode}/simulate-paid (404 di luar APP_ENV=local); MitraOrderService, DevPaymentService; tes MitraOrderTest (14 tes) + trait BuildsMitraFixtures. Branch feat/mitra-orders.
+- Setengah jadi: tes race dua proses (dev:race-accept), review ChatGPT, dan P4a-c (customer cancel/confirm/bayar, Midtrans, expiry+auto-complete). Skeleton Flutter belum.
+- Keputusan baru: rute simulate-paid selalu terdaftar, tapi service membalas 404 di luar local (supaya bisa dites). Kontrak §10.6-10.8 ditempel.
+- Bug diketahui: (isi setelah tes)
+- Catatan P4c: order waiting_payment yang customer-nya tidak pernah membuka pembayaran tidak punya baris payments. Batas D-06 harus dihitung dari waktu transisi waiting_payment di order_status_histories.
+- Berikutnya: 1) Jalankan tes P3c. 2) Review ChatGPT untuk P3a-c. 3) P4a.
+
+### 2026-11-10 · P4a hijau + hasil konsul dosen
+- AI: Claude · Fase: P4
+- Selesai: P4a (php artisan test: 55 lulus, 239 assertion, commit c04bcac, branch feat/order-customer-actions, ditumpuk di feat/mitra-orders): cancel (refund_pending kalau sudah bayar), confirm-completion, GET payment (payment null kalau belum ada).
+- Setengah jadi: tes catch-up B-13 untuk P1/P2; P4b Midtrans (butuh akun Sandbox dan paket midtrans/midtrans-php); P4c expiry + auto-complete; review ChatGPT (setelah backend selesai); push ke GitHub; skeleton Flutter belum.
+- Keputusan baru (konsul dosen 10 Nov): Q-1 Laravel + MySQL boleh, tidak wajib mockapi.io. Presentasi pertemuan 13. Luaran hanya Manual Book. Minimal 1 API eksternal (Midtrans), jadi simulate-paid bukan pengganti. Disarankan masuk GitHub.
+- Bug diketahui: (kosong)
+- Berikutnya: 1) Daftar Midtrans Sandbox + cek remote GitHub dan push. 2) P4b. 3) Mulai skeleton Flutter paralel (ChatGPT).
+
+
 <!-- Salin blok ini untuk sesi berikutnya:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>

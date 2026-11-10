@@ -325,23 +325,120 @@ Error bisnis (401, 403, 404, 409, 422 dari service) hanya punya `success` dan `m
 - 422 jika: jasa atau ukuran tidak aktif, kombinasi jasa + ukuran tidak punya harga aktif, atau ada add-on yang bukan milik jasa itu.
 - `/orders/quote` tidak menyimpan apa pun.
 
-
-
 ### 10.5 Mitra: profil, jasa, jadwal
 
 `GET /mitra/profile`, `PUT /mitra/profile` (body boleh sebagian: `bio`, `service_area`, `is_available`) → 200
+
 ```json
-{ "user_id": 4, "mitra_id": 1, "full_name": "Andi Pratama", "phone": "081200000021",
-  "bio": null, "service_area": null, "verification_status": "approved", "is_available": true }
+{
+  "user_id": 4,
+  "mitra_id": 1,
+  "full_name": "Andi Pratama",
+  "phone": "081200000021",
+  "bio": null,
+  "service_area": null,
+  "verification_status": "approved",
+  "is_available": true
+}
 ```
 
 `GET /mitra/services` → `data: [ { "id": 1, "category_id": 1, "service_name": "Home Cleaning", "description": "...", "duration_minutes": 120, "selected": true } ]`
 `PUT /mitra/services` body `{ "service_ids": [1, 2] }` → bentuk respons sama dengan GET. Array kosong = lepas semua. Jasa nonaktif/tidak ada → 422.
 
 `PUT /mitra/availabilities` (replace-all; array kosong = hapus semua) body:
+
 ```json
-{ "availabilities": [ { "day_of_week": 1, "start_time": "08:00", "end_time": "16:00", "is_active": true } ] }
+{
+  "availabilities": [
+    {
+      "day_of_week": 1,
+      "start_time": "08:00",
+      "end_time": "16:00",
+      "is_active": true
+    }
+  ]
+}
 ```
+
 → `data: [ { "id": 7, "day_of_week": 1, "start_time": "08:00", "end_time": "16:00", "is_active": true } ]`
 Aturan: `HH:MM`, selesai > mulai, di dalam jam operasional (08:00-20:00), tidak overlap di hari yang sama (bersentuhan boleh). `is_active` default `true`. `day_of_week`: 0 = Minggu.
 Semua endpoint `/mitra/*` butuh role `mitra`: tanpa token 401, role lain 403.
+
+### 10.6 Mitra: penawaran
+
+`GET /mitra/offers` → `data: [...]` (hanya yang `offered`, belum kedaluwarsa, order masih `searching_mitra`)
+
+```json
+{
+  "attempt_id": 12,
+  "attempt_number": 1,
+  "offered_at": "2026-11-11T09:00:00+07:00",
+  "expires_at": "2026-11-11T09:03:00+07:00",
+  "service": { "id": 1, "service_name": "Home Cleaning" },
+  "property_size": { "id": 2, "size_name": "Rumah Sedang" },
+  "scheduled_at": "2026-11-12T10:00:00+07:00",
+  "duration_minutes": 120,
+  "addons": [{ "name": "Pembersihan Sofa", "quantity": 1 }],
+  "pricing": {
+    "service_price": 150000,
+    "addons_total": 50000,
+    "total_price": 200000
+  }
+}
+```
+
+Tanpa `order_code`, nama/telepon/alamat customer (D-12).
+
+`POST /mitra/offers/{attempt_id}/accept` → 200, `data` = objek Order (§4) dengan `order_status: "waiting_payment"`, alamat dan telepon customer sudah terbuka.
+Error: 403 mitra belum approved/akun tidak aktif · 404 tawaran bukan milik mitra · 409 order sudah tidak mencari mitra / sudah diambil / tawaran tidak berlaku atau kedaluwarsa / jadwal bentrok atau tidak lagi memenuhi syarat.
+
+`POST /mitra/offers/{attempt_id}/reject` → 200, `data: null`. 404 dan 409 sama seperti accept. Setelah reject, backend menawarkan ke mitra berikutnya atau membatalkan order bila kandidat habis.
+
+### 10.7 Mitra: pesanan dan progres
+
+`GET /mitra/orders?status=&page=&per_page=` → 200, `data: [ objek Order (§4) ]` + `meta` (paginasi §1). Hanya pesanan yang ditugaskan ke mitra ini. `status` boleh beberapa dipisah koma (`confirmed,on_the_way`); status tidak dikenal → 422.
+
+`GET /mitra/orders/{order_code}` → 200, objek Order. Alamat lengkap dan telepon customer tampil di sini. Pesanan mitra lain / tidak ada → 404.
+
+`POST /mitra/orders/{order_code}/depart | arrive | start | finish` → 200, objek Order dengan status baru:
+| Endpoint | Dari → Ke |
+|---|---|
+| `depart` | `confirmed` → `on_the_way` (butuh payment `paid`) |
+| `arrive` | `on_the_way` → `arrived` |
+| `start` | `arrived` → `in_progress` |
+| `finish` | `in_progress` → `mitra_completed` |
+
+Error: 404 bukan pesanan milik mitra · 409 status tidak sesuai urutan / sudah dibatalkan / belum dibayar. Setelah `finish`, customer mengonfirmasi lewat `/orders/{kode}/confirm-completion` (P4a).
+
+### 10.8 Khusus dev: simulate-paid
+
+`POST /dev/orders/{order_code}/simulate-paid` → 200, objek Order `confirmed` dengan `payment.payment_status = "paid"` (`gateway = simulator`, `gateway_order_id = {kode}-DEV1`). Tanpa token. Hanya `APP_ENV=local`, di luar itu 404. 409 jika order bukan `waiting_payment`. JANGAN dijalankan dengan `APP_ENV=local` di server publik.
+
+### 10.9 Customer/guest: batal, konfirmasi selesai, status bayar
+
+Akses seperti §4: customer login (pemilik) tanpa `phone`, atau guest dengan `phone` (body untuk POST, query untuk GET). Tidak cocok → 404 generik + throttle (D-13).
+
+`POST /orders/{order_code}/cancel` body `{ "phone": "08...", "reason": "opsional, maks 255" }` → 200, objek Order (§4) berstatus `cancelled`.
+- Boleh dari `searching_mitra`, `waiting_payment`, `confirmed`, `on_the_way`, `arrived`. Dari `in_progress`, `mitra_completed`, `completed`, atau yang sudah `cancelled` → 409.
+- Jika payment sudah `paid`: payment jadi `refund_pending` dan `refund_amount` = nominal penuh (admin memproses manual, D-08). Payment `pending` tidak diubah.
+- Tawaran mitra yang masih menggantung ikut ditutup.
+
+`POST /orders/{order_code}/confirm-completion` body `{ "phone": "08..." }` → 200, objek Order berstatus `completed`. Hanya dari `mitra_completed`, selain itu 409.
+
+`GET /orders/{order_code}/payment?phone=08...` → 200
+```json
+{
+  "order_code": "JR-7K2M9QXD",
+  "order_status": "confirmed",
+  "tracking_stage": "confirmed",
+  "payment": {
+    "payment_status": "paid",
+    "amount": 200000,
+    "payment_method": "bank_transfer",
+    "paid_at": "2026-11-20T09:10:00+07:00",
+    "expired_at": "2026-11-20T09:30:00+07:00",
+    "refund_amount": null
+  }
+}
+```
+`payment` bernilai `null` jika belum ada transaksi bayar (bukan 404). Flutter memanggil ini berulang setelah WebView pembayaran ditutup (F-8). Pada P4b, jika status masih `pending`, backend boleh menanyakan Midtrans Status API.
