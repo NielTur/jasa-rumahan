@@ -6,30 +6,31 @@
 
 ## Sekarang
 
-| Item | Isi |
-|---|---|
-| Fase aktif | **P4** (backend). Urutan sisa: tes catch-up B-13 → P4c → P5 → P4b → P6 → Flutter → Manual Book |
-| Terakhir diperbarui | 11 Nov 2026 oleh Claude |
-| Selesai (backend, dites hijau) | P1 auth + katalog + quote · P2 slots + buat order + matching · P3a-c sisi mitra + simulate-paid · P4a cancel + confirm-completion + GET payment. `php artisan test`: **55 lulus, 239 assertion** |
-| Setengah jadi | 1) **34 tes catch-up B-13** (P1/P2) sudah ditulis di chat sebelumnya tapi **belum disimpan dan belum dijalankan**; kalau file-nya hilang, minta tulis ulang (T1). 2) Dokumen ini belum di-commit. 3) Review ChatGPT untuk P3a-P4a belum (ditunda sampai backend selesai; cukup sekali di branch teratas). 4) Belum ada kode Flutter |
-| Belum terkonfirmasi | a) `php artisan key:generate` setelah APP_KEY lama sempat bocor di `.env.example` (sudah dikosongkan dan di-push). b) Repo GitHub berstatus **Private**. c) Hasil `SELECT COUNT(*) FROM services;` (harapan: 3). d) `scripts/bundle-chatgpt.ps1` dan `scripts/dump-code.ps1` belum pernah dijalankan di Windows |
-| Bug yang diketahui | Dugaan, belum dibuktikan tes: harga bertipe string lolos cast; `quantity` negatif belum ditolak. Cek lewat tes catch-up |
-| Keputusan USULAN yang menunggu | D-22, D-23, D-24 (DECISIONS §1); Q-2, Q-4, Q-5, Q-6, Q-8, Q-9 terbuka |
-| 3 langkah berikutnya | 1) T0 housekeeping: commit dokumen, key:generate, cek Private, simpan dan jalankan tes catch-up (target 89 tes). 2) T2 P4c: `payments:expire-pending`, `orders:auto-complete`, lazy expiry. 3) T3 P5 admin Blade |
-| Cara menjalankan | `cd backend` → `php artisan migrate:fresh --seed` → `php artisan serve --host=0.0.0.0 --port=8000`; terminal lain `php artisan schedule:work`. Tes: `php artisan test` (MySQL DB `jasa_rumahan_test` harus ada, lihat README) |
+| Item                            | Isi                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fase aktif                      | **P4** (backend). Urutan sisa: tes catch-up B-13 → P4c → P5 → P4b → P6 → Flutter → Manual Book                                                                                                                                                                                                                                                                                                                                          |
+| Terakhir diperbarui             | 11 Nov 2026 (malam) oleh Claude, setelah T0 selesai                                                                                                                                                                                                                                                                                                                                                                                     |
+| Selesai (backend, dites hijau)  | P1 auth + katalog + quote · P2 slots + buat order + matching · P3a-c sisi mitra + simulate-paid · P4a cancel + confirm-completion + GET payment. `php artisan test`: **55 lulus, 239 assertion**                                                                                                                                                                                                                                        |
+| Setengah jadi                   | 1) **34 tes catch-up B-13** (P1/P2) sudah ditulis di chat sebelumnya tapi **belum disimpan dan belum dijalankan**; kalau file-nya hilang, minta tulis ulang (T1). 2) Review ChatGPT untuk P3a-P4a belum (ditunda sampai backend selesai; cukup sekali di branch teratas). 3) Belum ada kode Flutter. 4) Salinan `PROGRESS.md` dan `PLAN_LANJUTAN.md` di repo belum memuat status T0 selesai (versi Project sudah); salin saat commit T1 |
+| Sudah dikonfirmasi (11 Nov, T0) | `php artisan key:generate` dijalankan; `.env.example` berisi `APP_KEY=` kosong dan hanya `.env.example` yang dilacak Git; repo GitHub **Private**; `SELECT COUNT(*) FROM services;` = **3**; `scripts/dump-code.ps1` jalan (126 file, 243 KB → `chatgpt-bundle/KODE_BACKEND.txt`)                                                                                                                                                       |
+| Belum terkonfirmasi             | `scripts/bundle-chatgpt.ps1` belum dijalankan di Windows (3 bundel ChatGPT yang diunggah dibuat Claude dengan logika yang sama)                                                                                                                                                                                                                                                                                                         |
+| Bug yang diketahui              | Dugaan, belum dibuktikan tes: harga bertipe string lolos cast; `quantity` negatif belum ditolak. Cek lewat tes catch-up                                                                                                                                                                                                                                                                                                                 |
+| Keputusan USULAN yang menunggu  | D-22, D-23, D-24 (DECISIONS §1); Q-2, Q-4, Q-5, Q-6, Q-8, Q-9 terbuka                                                                                                                                                                                                                                                                                                                                                                   |
+| 3 langkah berikutnya            | 1) **T1** tes catch-up B-13 (tulis ulang 34 tes, target 89 hijau). 2) T2 P4c: `payments:expire-pending`, `orders:auto-complete`, lazy expiry. 3) T3 P5 admin Blade. Paralel: Flutter di ChatGPT (`PROMPTS.md` §0.3)                                                                                                                                                                                                                     |
+| Cara menjalankan                | `cd backend` → `php artisan migrate:fresh --seed` → `php artisan serve --host=0.0.0.0 --port=8000`; terminal lain `php artisan schedule:work`. Tes: `php artisan test` (MySQL DB `jasa_rumahan_test` harus ada, lihat README)                                                                                                                                                                                                           |
 
 ## Versi terpasang (dari output perintah)
 
-| Alat | Versi |
-|---|---|
-| PHP | 8.3.32 |
-| Laravel | 10.50.4 |
-| Laravel Sanctum | 3.3.3 |
-| Composer | 2.11.1 |
-| MySQL (Laragon) | 8.0.30 |
-| PHPUnit | ^10 (dari `composer.json`) |
-| HeidiSQL | 12.1.0.6537 |
-| Flutter / Dart | 3.41.6 / 3.11.4 |
+| Alat                                           | Versi                                  |
+| ---------------------------------------------- | -------------------------------------- |
+| PHP                                            | 8.3.32                                 |
+| Laravel                                        | 10.50.4                                |
+| Laravel Sanctum                                | 3.3.3                                  |
+| Composer                                       | 2.11.1                                 |
+| MySQL (Laragon)                                | 8.0.30                                 |
+| PHPUnit                                        | ^10 (dari `composer.json`)             |
+| HeidiSQL                                       | 12.1.0.6537                            |
+| Flutter / Dart                                 | 3.41.6 / 3.11.4                        |
 | Dio, shared_preferences, intl, webview_flutter | belum dipasang (Flutter belum dimulai) |
 
 Lingkungan: Windows, Laragon, VS Code, PowerShell.
@@ -38,13 +39,13 @@ Lingkungan: Windows, Laragon, VS Code, PowerShell.
 
 GitHub: https://github.com/NielTur/jasa-rumahan (target: Private). Branch ditumpuk (stacked): tiap branch dibuat dari branch sebelumnya, jadi review dan merge dilakukan **sekali di branch teratas**.
 
-| Branch | Commit | Isi | Tes setelah branch ini |
-|---|---|---|---|
-| `main` | `09a0859` | P1 + P2 (sebelumnya `97e25bc`) + perbaikan `.env.example` (APP_KEY dikosongkan) | belum ada tes otomatis |
-| `feat/mitra-setup` | `f9bbefd` | P3a profil, jasa, jadwal mitra + `phpunit.xml` ke DB test | 12 |
-| `feat/mitra-offers` | `52991be` | P3b offers accept/reject (B-5) | 24 |
-| `feat/mitra-orders` | `3c64ced` | P3c order mitra, progres, simulate-paid | 38 |
-| `feat/order-customer-actions` | `c04bcac` (P4a), lalu `adefd70` (perbaikan `.env.example`, fast-forward) dan `ee82fbd` (dokumen) | P4a cancel, confirm-completion, GET payment | **55** |
+| Branch                        | Commit                                                                                                                                                          | Isi                                                                             | Tes setelah branch ini |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------- |
+| `main`                        | `09a0859`                                                                                                                                                       | P1 + P2 (sebelumnya `97e25bc`) + perbaikan `.env.example` (APP_KEY dikosongkan) | belum ada tes otomatis |
+| `feat/mitra-setup`            | `f9bbefd` (kode P3a; ujung branch `9cf6850` = commit dokumen di atasnya)                                                                                        | P3a profil, jasa, jadwal mitra + `phpunit.xml` ke DB test                       | 12                     |
+| `feat/mitra-offers`           | `52991be`                                                                                                                                                       | P3b offers accept/reject (B-5)                                                  | 24                     |
+| `feat/mitra-orders`           | `3c64ced`                                                                                                                                                       | P3c order mitra, progres, simulate-paid                                         | 38                     |
+| `feat/order-customer-actions` | `c04bcac` (P4a), lalu `adefd70` (perbaikan `.env.example`, fast-forward), `ee82fbd` (dokumen), ujung branch **`fa5f42f`** (paket dokumen 11 Nov, sudah di-push) | P4a cancel, confirm-completion, GET payment                                     | **55**                 |
 
 Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelum mulai; tabel ini ditulis dari output yang ditempel di chat.
 
@@ -59,6 +60,15 @@ Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelu
 - **Port 3306 sempat diblok Windows.** Fix di PowerShell admin: `net stop winnat`, `netsh int ipv4 add excludedportrange protocol=tcp startport=3306 numberofports=1`, `net start winnat`.
 
 ## Log sesi (terbaru di atas)
+
+### 2026-11-11 · T0 housekeeping selesai
+
+- AI: Claude · Fase: P4 (antara P4a dan T1)
+- Selesai: paket dokumen di-commit dan di-push (`fa5f42f`, 12 file); APP_KEY baru dibuat; cek rahasia `base64:` di diff kosong; repo Private; `services` = 3; `dump-code.ps1` jalan (126 file, 243 KB). Bundel ChatGPT (3 file) sudah dibuat dan dikirim; **belum dikonfirmasi** apakah sudah diunggah ke Project ChatGPT dan 5 file lama (8 Nov) dihapus.
+- Setengah jadi: T1 (tes catch-up) belum dimulai.
+- Keputusan baru: Project ChatGPT gratis menampung 5 file, bukan 3 (bundel tetap 3 file).
+- Bug diketahui: lihat "Sekarang".
+- Berikutnya: 1) T1. 2) T2. 3) Flutter paralel di ChatGPT.
 
 ### 2026-11-11 · Update paket dokumen (tanpa kode)
 

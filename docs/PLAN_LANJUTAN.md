@@ -7,16 +7,16 @@
 
 Tujuan: demo di **pertemuan 13** dengan backend lengkap (termasuk Midtrans Sandbox), dua app Flutter yang menjalankan alur utama, dan **Manual Book** sebagai satu-satunya luaran tertulis.
 
-| Kode | Pekerjaan | Bergantung pada | Perkiraan sesi chat | Status |
-|---|---|---|---|---|
-| T0 | Housekeeping (commit dokumen, key:generate, cek Private) | - | 0,5 | belum |
-| T1 | Tes catch-up B-13 untuk P1/P2 | T0 | 1 | kode tes ada di chat lama, belum disimpan |
-| T2 | P4c: expiry bayar + auto-complete | T1 | 1 | belum |
-| T3 | P5: Admin Blade | T2 | 2 | belum |
-| T4 | P4b: Midtrans Sandbox | T3, akun Sandbox, ngrok | 2 | belum |
-| T5 | P6: hardening backend | T4 | 1-2 | belum |
-| T6 | Flutter (customer + mitra), ChatGPT | T5 (sebagian bisa mulai setelah T3) | 4+ | belum |
-| T7 | Manual Book | T6 | 1-2 | belum |
+| Kode | Pekerjaan                                                | Bergantung pada                     | Perkiraan sesi chat | Status                                    |
+| ---- | -------------------------------------------------------- | ----------------------------------- | ------------------- | ----------------------------------------- |
+| T0   | Housekeeping (commit dokumen, key:generate, cek Private) | -                                   | 0,5                 | **selesai 11 Nov** (`fa5f42f`)            |
+| T1   | Tes catch-up B-13 untuk P1/P2                            | T0                                  | 1                   | kode tes ada di chat lama, belum disimpan |
+| T2   | P4c: expiry bayar + auto-complete                        | T1                                  | 1                   | belum                                     |
+| T3   | P5: Admin Blade                                          | T2                                  | 2                   | belum                                     |
+| T4   | P4b: Midtrans Sandbox                                    | T3, akun Sandbox, ngrok             | 2                   | belum                                     |
+| T5   | P6: hardening backend                                    | T4                                  | 1-2                 | belum                                     |
+| T6   | Flutter (customer + mitra), ChatGPT                      | T5 (sebagian bisa mulai setelah T3) | 4+                  | belum                                     |
+| T7   | Manual Book                                              | T6                                  | 1-2                 | belum                                     |
 
 Urutan T2 → T3 → T4 disengaja: P4b butuh akun Sandbox dan tunnel, sedangkan P4c dan P5 tidak. Backend bisa jalan terus sementara akun dibuat.
 
@@ -30,14 +30,14 @@ Urutan T2 → T3 → T4 disengaja: P4b butuh akun Sandbox dan tunnel, sedangkan 
 
 Semua perintah di PowerShell, dari `C:\laragon\www\jasa-rumahan`. Tempel hasil tiap blok; berhenti kalau ada `error:` atau `fatal:`.
 
-- [ ] **Cek keadaan git.** `git status` lalu `git branch -vv`. Harapan: bersih, branch `feat/order-customer-actions` di commit `ee82fbd` (atau lebih baru).
-- [ ] **Masukkan dokumen baru.** Ekstrak zip dokumen ke root repo (struktur folder sudah sama, timpa jika ditanya): `README.md`, `AI_RULES.md`, `CLAUDE.md`, `AGENTS.md`, `scripts/bundle-chatgpt.ps1`, `scripts/dump-code.ps1` di root; `API_CONTRACT.md`, `DECISIONS.md`, `PROGRESS.md`, `PROMPTS.md`, `PLAN_LANJUTAN.md` di `docs/`. Tambahkan satu baris `chatgpt-bundle/` ke `.gitignore`. Lalu `git status` (harapan: 11 file berubah/baru), `git add README.md AI_RULES.md CLAUDE.md AGENTS.md scripts docs .gitignore`, `git commit -m "docs: perbarui paket dokumen (kontrak v0.2, keputusan, rencana lanjutan)"`, `git push`.
-- [ ] **Buat APP_KEY baru.** `cd backend` lalu `php artisan key:generate`. Cek `.env.example` masih `APP_KEY=` kosong: `findstr APP_KEY .env.example`. Key lama pernah ter-push, jadi anggap sudah bocor; key baru hanya hidup di `.env` lokal. (Efek samping dev: token/session lama tidak valid, login ulang.)
-- [ ] **Pastikan repo Private.** Di GitHub: buka repo → Settings → General → bagian Danger Zone menampilkan "Change repository visibility"; badge di samping nama repo harus "Private". Kalau Public, ubah ke Private.
-- [ ] **Cek data master.** Di HeidiSQL (DB `jasa_rumahan`): `SELECT COUNT(*) FROM services;` Harapan: 3. Kalau bukan 3, catat angkanya di PROGRESS dan jangan lanjut asumsi tes sebelum dicek.
-- [ ] **Perbarui isi Project.** Claude Project: unggah file asli. ChatGPT: jalankan `powershell -ExecutionPolicy Bypass -File scripts/bundle-chatgpt.ps1`, lalu unggah 3 file di `chatgpt-bundle/` (`PROMPTS.md` §G). Isi Project tidak sinkron otomatis.
+- [x] **Cek keadaan git.** `git status` lalu `git branch -vv`. Harapan: bersih, branch `feat/order-customer-actions` di commit `ee82fbd` (atau lebih baru).
+- [x] **Masukkan dokumen baru.** Ekstrak zip dokumen ke root repo (struktur folder sudah sama, timpa jika ditanya): `README.md`, `AI_RULES.md`, `CLAUDE.md`, `AGENTS.md`, `scripts/bundle-chatgpt.ps1`, `scripts/dump-code.ps1` di root; `API_CONTRACT.md`, `DECISIONS.md`, `PROGRESS.md`, `PROMPTS.md`, `PLAN_LANJUTAN.md` di `docs/`. Tambahkan satu baris `chatgpt-bundle/` ke `.gitignore`. Lalu `git status` (harapan: 11 file berubah/baru), `git add README.md AI_RULES.md CLAUDE.md AGENTS.md scripts docs .gitignore`, `git commit -m "docs: perbarui paket dokumen (kontrak v0.2, keputusan, rencana lanjutan)"`, `git push`.
+- [x] **Buat APP_KEY baru.** `cd backend` lalu `php artisan key:generate`. Cek `.env.example` masih `APP_KEY=` kosong: `findstr APP_KEY .env.example`. Key lama pernah ter-push, jadi anggap sudah bocor; key baru hanya hidup di `.env` lokal. (Efek samping dev: token/session lama tidak valid, login ulang.)
+- [x] **Pastikan repo Private.** Di GitHub: buka repo → Settings → General → bagian Danger Zone menampilkan "Change repository visibility"; badge di samping nama repo harus "Private". Kalau Public, ubah ke Private.
+- [x] **Cek data master.** Di HeidiSQL (DB `jasa_rumahan`): `SELECT COUNT(*) FROM services;` Harapan: 3. Kalau bukan 3, catat angkanya di PROGRESS dan jangan lanjut asumsi tes sebelum dicek.
+- [ ] **Perbarui isi Project (belum dikonfirmasi).** Claude Project: unggah file asli. ChatGPT: jalankan `powershell -ExecutionPolicy Bypass -File scripts/bundle-chatgpt.ps1`, lalu unggah 3 file di `chatgpt-bundle/` (`PROMPTS.md` §G). Isi Project tidak sinkron otomatis.
 
-**Selesai bila:** `git status` bersih, push berhasil, `key:generate` sudah dijalankan, repo Private, COUNT dicatat.
+**SELESAI 11 Nov 2026** (commit `fa5f42f`, `services` = 3, repo Private, `key:generate` dijalankan). Sisa: unggah 3 bundel ke Project ChatGPT (hapus 5 file lama). Syarat awal: `git status` bersih, push berhasil, `key:generate` sudah dijalankan, repo Private, COUNT dicatat.
 
 ---
 
@@ -53,15 +53,15 @@ Konteks: P1 dan P2 dites manual saja. Empat file tes (34 tes) sudah ditulis di c
 
 Cakupan minimal yang harus ada:
 
-| Area | Kasus |
-|---|---|
-| Auth | register customer/mitra (201 + token), login benar/salah (401), telepon dinormalisasi `+62` → `0`, admin ditolak (403), logout mencabut token, `/auth/me` |
+| Area            | Kasus                                                                                                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auth            | register customer/mitra (201 + token), login benar/salah (401), telepon dinormalisasi `+62` → `0`, admin ditolak (403), logout mencabut token, `/auth/me`                     |
 | Katalog + quote | harga benar (mis. 270000), kombinasi jasa+ukuran tanpa harga (422), add-on jasa lain (422), `quantity` > 20 (422), jasa nonaktif (404), ubah harga di DB → quote ikut berubah |
-| Slots | 6 slot, slot terlalu dekat `available=false`, slot tanpa mitra `available=false`, mitra bentrok membuat slot penuh |
-| Buat order | guest dan login (201), total palsu dari client diabaikan, bukan slot (422), dobel-tap (409), slot tanpa mitra (409) |
-| Lacak | kode + telepon benar, telepon salah (404 generik), 5 gagal → 429, polling sukses tidak terkena 429 (CR-10) |
-| Transisi status | transisi valid dan invalid lewat `OrderStatusService` (409 lewat API) |
-| Matching | attempt dibuat, expired → pindah ke mitra berikutnya, habis → `cancelled` |
+| Slots           | 6 slot, slot terlalu dekat `available=false`, slot tanpa mitra `available=false`, mitra bentrok membuat slot penuh                                                            |
+| Buat order      | guest dan login (201), total palsu dari client diabaikan, bukan slot (422), dobel-tap (409), slot tanpa mitra (409)                                                           |
+| Lacak           | kode + telepon benar, telepon salah (404 generik), 5 gagal → 429, polling sukses tidak terkena 429 (CR-10)                                                                    |
+| Transisi status | transisi valid dan invalid lewat `OrderStatusService` (409 lewat API)                                                                                                         |
+| Matching        | attempt dibuat, expired → pindah ke mitra berikutnya, habis → `cancelled`                                                                                                     |
 
 **Dugaan bug yang harus dibuktikan dulu lewat tes:** (1) harga bertipe string lolos cast di request; (2) `quantity` negatif belum ditolak. Kalau terbukti, perbaiki di `FormRequest` dan catat sebagai bug yang ditemukan tes.
 
@@ -169,11 +169,11 @@ Format bebas (tidak ada template dari dosen); isi = panduan memakai aplikasi. Gu
 
 ## Yang butuh tindakan manusia (bukan AI)
 
-| Apa | Kapan | Catatan |
-|---|---|---|
-| Tanya dosen: Q-8 (perlu APK?), Q-9 (Sandbox cukup?), tanggal pasti pertemuan 13 | secepatnya | jawab di DECISIONS §3 |
-| Isi tabel tim di README (Q-6) | sebelum T7 | Manual Book perlu nama dan peran |
-| Buat akun Midtrans Sandbox + ambil kunci | sebelum T4 | kunci hanya di `.env` |
-| Jawab Q-5 (desain UI) dan Q-4 (lingkungan demo) | sebelum T6 | |
-| Setujui atau ubah D-22, D-23, D-24 | sebelum T2 dan T4 | usulan Claude, belum disetujui |
-| Perbarui isi Project Claude dan ChatGPT setelah dokumen berubah | tiap sesi besar | tidak sinkron otomatis |
+| Apa                                                                             | Kapan             | Catatan                          |
+| ------------------------------------------------------------------------------- | ----------------- | -------------------------------- |
+| Tanya dosen: Q-8 (perlu APK?), Q-9 (Sandbox cukup?), tanggal pasti pertemuan 13 | secepatnya        | jawab di DECISIONS §3            |
+| Isi tabel tim di README (Q-6)                                                   | sebelum T7        | Manual Book perlu nama dan peran |
+| Buat akun Midtrans Sandbox + ambil kunci                                        | sebelum T4        | kunci hanya di `.env`            |
+| Jawab Q-5 (desain UI) dan Q-4 (lingkungan demo)                                 | sebelum T6        |                                  |
+| Setujui atau ubah D-22, D-23, D-24                                              | sebelum T2 dan T4 | usulan Claude, belum disetujui   |
+| Perbarui isi Project Claude dan ChatGPT setelah dokumen berubah                 | tiap sesi besar   | tidak sinkron otomatis           |
