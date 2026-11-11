@@ -3,11 +3,13 @@
 Aturan kerja untuk semua AI (Claude, ChatGPT, dll.) yang membantu proyek **Marketplace Jasa Rumahan**.
 Setiap aturan punya ID supaya gampang menegur AI: *"kamu melanggar B-4"*.
 
+> Revisi 11 Nov 2026: konteks dosen (§1 butir 4), G-9, G-12, B-5, B-13, Git-2, Git-4, Git-5, Git-6. `CLAUDE.md` dan `AGENTS.md` kini hanya pointer ke file ini; jangan disalin lagi.
+
 ## 0. Cara pakai (untuk pemilik proyek)
 
-- Claude Code / agent berbasis file: salin file ini jadi `CLAUDE.md` dan `AGENTS.md` di root repo.
-- Chat biasa: unggah ke Project (Claude Project dan ChatGPT Project), lalu tempel Prompt Kickoff dari `docs/PROMPTS.md` §B di sesi baru.
-- Tiap sesi baru, lampirkan: `AI_RULES.md`, `docs/PROGRESS.md`, bagian `docs/API_CONTRACT.md` yang relevan, dan file yang akan diubah. Jangan tempel seluruh dokumen desain kecuali diminta.
+- Claude Code / agent berbasis file: `CLAUDE.md` dan `AGENTS.md` di root repo menunjuk ke file ini, jadi tidak ada salinan yang bisa basi.
+- Chat biasa: unggah ke Project (Claude Project dan ChatGPT Project), lalu tempel Prompt Kickoff dari `docs/PROMPTS.md` §B di sesi baru. Project ChatGPT gratis hanya menampung 5 file: pakai bundel 3 file dari `docs/PROMPTS.md` §G (dibuat oleh `scripts/bundle-chatgpt.ps1`).
+- Tiap sesi baru, lampirkan: `AI_RULES.md`, `docs/PROGRESS.md`, `docs/PLAN_LANJUTAN.md`, bagian `docs/API_CONTRACT.md` yang relevan, `docs/DECISIONS.md` §5, dan file yang akan diubah. Jangan tempel seluruh dokumen desain kecuali diminta. Prompt siap tempel ada di `docs/PROMPTS.md` §E.7.
 - AI tidak punya ingatan antar chat. Satu-satunya "ingatan" proyek adalah `docs/PROGRESS.md`. Perbarui di akhir setiap sesi.
 
 ## 1. Proyek dalam 6 baris
@@ -15,7 +17,7 @@ Setiap aturan punya ID supaya gampang menegur AI: *"kamu melanggar B-4"*.
 1. Marketplace jasa rumahan (Home Cleaning, Lawn Mowing, Tree Trimming, dll). Role: Customer (boleh guest), Mitra, Admin.
 2. Komponen: `customer_app` dan `mitra_app` (Flutter), `backend` (Laravel REST API + Admin Blade), MySQL 16 tabel, Dio, Midtrans (sandbox).
 3. Aturan inti: 1 pesanan = 1 jasa utama = 1 mitra. Add-on bagian dari pesanan. Harga dihitung ulang di server. Status pesanan terpisah dari status pembayaran.
-4. Ini tugas akhir Mobile Programming II (BSI), dikerjakan mahasiswa dalam ±4 minggu.
+4. Ini tugas akhir Mobile Programming II (BSI). Konteks dari dosen (konsultasi 10 Nov 2026): Laravel + MySQL boleh, presentasi di **pertemuan 13**, luaran akhir **hanya Manual Book** (panduan pemakaian per role, tanpa template baku), **minimal 1 API eksternal** (Midtrans), proyek disarankan di GitHub. Lingkungan pemilik proyek: Windows, Laragon, VS Code, PowerShell, PHP 8.3, Laravel 10.50.4, MySQL 8.0.
 5. Dinilai lewat demo, kode, dan dokumen. Kode harus **bisa dipahami dan dijelaskan mahasiswa**; itu lebih penting daripada canggih.
 6. Fokus MVP. Fitur backlog dilarang kecuali diminta eksplisit (G-5).
 
@@ -48,10 +50,10 @@ Jika dua sumber bertentangan: **berhenti dan laporkan**. Jangan memilih diam-dia
 - **G-6 Format copy-paste.** Setiap blok kode diawali path file. File ≤ 200 baris ditulis utuh. Lebih panjang: tulis per bagian dengan lokasi jelas dan 3 baris konteks. Dilarang `// ... kode lainnya tetap`.
 - **G-7 Jujur soal verifikasi.** Kode yang tidak dijalankan harus ditulis "belum dijalankan". Dilarang bilang "sudah dites" tanpa bukti output.
 - **G-8 Versi.** Jangan menebak versi paket/API. Baca `composer.json` / `pubspec.yaml`. Kalau tidak tahu, minta output `php -v`, `composer show laravel/framework`, `flutter --version`. Pakai API yang tidak deprecated (contoh: Dio `DioException`, bukan `DioError`; `ElevatedButton.styleFrom(backgroundColor:)`, bukan `primary:`). Kode di modul kuliah sebagian memakai API lama.
-- **G-9 Rahasia.** Jangan pernah menulis kunci Midtrans, `APP_KEY`, atau password asli. Pakai `.env` dan `.env.example`.
+- **G-9 Rahasia.** Jangan pernah menulis kunci Midtrans, `APP_KEY`, atau password asli. Pakai `.env` dan `.env.example`. `.env.example` wajib berisi `APP_KEY=` **kosong** dan kunci Midtrans kosong. Sebelum commit: `git diff --cached` dan cari `APP_KEY=base64`, `SB-Mid-server`, `SB-Mid-client`. Kunci yang pernah ter-commit dianggap bocor (ganti, jangan sekadar dihapus dari file).
 - **G-10 Postflight.** Akhiri setiap jawaban dengan: (a) langkah menjalankan/menguji, (b) yang belum terverifikasi, (c) baris siap-tempel untuk `docs/PROGRESS.md`, (d) **Catatan Presentasi** 3-5 baris.
 - **G-11 Bisa dijelaskan.** Nama jelas, fungsi pendek, komentar Bahasa Indonesia pada logika bisnis penting (bukan tiap baris). Hindari abstraksi yang tidak perlu.
-- **G-12 Berhenti dan lapor** jika: dokumen saling bertentangan, perlu mengubah skema DB yang sudah disepakati, ada risiko keamanan, atau permintaan keluar dari MVP.
+- **G-12 Berhenti dan lapor** jika: dokumen saling bertentangan, perlu mengubah skema DB yang sudah disepakati, ada risiko keamanan, atau permintaan keluar dari MVP. Termasuk **dokumen basi**: kalau `PROGRESS.md`, `API_CONTRACT.md` §11, atau README bilang satu hal dan kode/tes bilang hal lain, laporkan dulu dan pakai kode sebagai bukti, jangan menimpa salah satunya diam-diam.
 
 ## 5. Backend Laravel (B)
 
@@ -59,7 +61,7 @@ Jika dua sumber bertentangan: **berhenti dan laporkan**. Jangan memilih diam-dia
 - **B-2 Skema.** Ikuti dokumen desain §13 persis (16 tabel, tipe, FK, UNIQUE, indeks §15.14). Setelah Fase P0 selesai, jangan edit migration lama; perubahan = migration baru + CHANGE REQUEST.
 - **B-3 Uang & harga.** DB `DECIMAL(12,2)`; API dan Midtrans memakai **integer rupiah**. Hitung ulang harga di server dari `service_prices` dan `service_addons`; abaikan total dari Flutter. Add-on harus milik jasa yang dipilih, dan semua master harus `is_active`.
 - **B-4 Satu pintu status.** Status pesanan hanya berubah lewat `OrderStatusService::transition(order, to, actor, note)`, yang memvalidasi transisi (tabel di kontrak §6) dan menulis `order_status_histories`. Dilarang `$order->update(['order_status' => ...])` di tempat lain.
-- **B-5 Accept aman.** Penetapan mitra dalam `DB::transaction` dengan `lockForUpdate` (order dan mitra_profile), lalu cek ulang: status masih `searching_mitra`, `mitra_id` masih NULL, attempt masih `offered` dan belum kedaluwarsa, jadwal tidak bentrok.
+- **B-5 Accept aman.** Penetapan mitra dalam `DB::transaction` dengan `lockForUpdate` (order dan mitra_profile), lalu cek ulang: status masih `searching_mitra`, `mitra_id` masih NULL, attempt masih `offered` dan belum kedaluwarsa, jadwal tidak bentrok. Implementasi (`MitraOfferService`): urutan kunci **order → mitra_profile → attempt** (selalu urutan yang sama, cegah deadlock), lalu re-check.
 - **B-6 Matching.** Sekuensial: satu mitra per attempt, tiap attempt dicatat di `order_mitra_attempts`. Timeout dan batas percobaan dari `config/marketplace.php` (.env), bukan angka literal.
 - **B-7 Midtrans.**
   - `gateway_order_id` unik per percobaan bayar (`{order_code}-{n}`).
@@ -76,6 +78,10 @@ Jika dua sumber bertentangan: **berhenti dan laporkan**. Jangan memilih diam-dia
 - **B-11 Jangan tertukar ID.** `mitra_id` selalu `mitra_profiles.id`, bukan `users.id`. Response mitra menyertakan `user_id` dan `mitra_id` dengan nama jelas.
 - **B-12 Jangan hapus master.** Data master yang pernah dipakai transaksi dinonaktifkan (`is_active = false`), bukan dihapus. FK transaksi tanpa cascade delete.
 - **B-13 Tes minimal wajib** (feature/unit test): kalkulasi harga; bentrok jadwal; transisi status valid dan invalid; dua mitra accept bersamaan; webhook (signature salah, duplikat, out-of-order, amount beda); guest tracking tidak cocok.
+  - Tes memakai **MySQL terpisah** `jasa_rumahan_test` (`phpunit.xml` memaksa `DB_CONNECTION` dan `DB_DATABASE` dengan `force="true"`, `RefreshDatabase`). Jangan SQLite: `lockForUpdate` diabaikan di sana. Jangan `config:cache` di dev.
+  - Data awal tes lewat trait `tests/Concerns/BuildsMitraFixtures.php`; pakai ulang, jangan menulis ulang fixture.
+  - Tes "accept bersamaan" di PHPUnit (satu proses) hanya membuktikan re-check. Jangan menyebutnya bukti race nyata; bukti nyata = `dev:race-accept` (dua proses `php artisan`, P6).
+  - Tes yang bergantung waktu memakai `Carbon::setTestNow`, bukan `sleep`.
 - **B-14 Seeder demo.** Admin, 2 customer, 3 mitra approved, kategori/jasa/ukuran/harga/add-on, supaya demo tidak bergantung input manual.
 - **B-15 Expiry ganda.** Kedaluwarsa offer dan pembayaran diproses oleh scheduler (`schedule:work`) **dan** secara lazy saat endpoint baca dipanggil, sehingga demo tetap benar tanpa scheduler.
 
@@ -105,9 +111,11 @@ Jika dua sumber bertentangan: **berhenti dan laporkan**. Jangan memilih diam-dia
 ## 8. Git & sesi
 
 - **Git-1** Satu tugas = satu branch `feat/<area>-<ringkas>`. Commit kecil, contoh: `feat(order): hitung harga di server`.
-- **Git-2** Jangan commit `.env`, kunci, `vendor/`, `build/`.
+- **Git-2** Jangan commit `.env`, kunci, `vendor/`, `build/`, `.phpunit.result.cache` (sudah di `.gitignore`). `.env.example` boleh, dengan nilai rahasia kosong (G-9).
 - **Git-3** Awal sesi baca `docs/PROGRESS.md`. Akhir sesi berikan baris pembaruannya.
-- **Git-4** Merge ke `main` hanya jika: sudah jalan di emulator/Postman, tes backend hijau, sudah direview AI lain (`PROMPTS.md` §E), dan disetujui manusia.
+- **Git-4** Merge ke `main` hanya jika: sudah jalan di emulator/Postman, tes backend hijau, sudah direview AI lain (`PROMPTS.md` §E), dan disetujui manusia. Branch boleh **ditumpuk** (stacked: tiap branch dibuat dari branch sebelumnya); review dilakukan **sekali di branch teratas** dengan `git diff main...<branch-teratas>`, dan review ditunda sampai backend selesai (keputusan 10 Nov).
+- **Git-5 Push tiap tahap hijau.** Setelah satu tahap (mis. P4a) lulus `php artisan test` dan sudah di-commit, langsung `git push -u origin <branch>`. Remote: `NielTur/jasa-rumahan`, harus **Private**. GitHub dipakai sebagai rekaman dokumentasi (saran dosen).
+- **Git-6 Perintah git per blok kecil.** PowerShell tetap menjalankan baris berikutnya setelah ada error. Jadi tulis perintah git dalam blok pendek (maks 3-4 baris), minta user menempel hasilnya, dan **berhenti jika ada `error:` atau `fatal:`**. Sebelum pindah branch: `git status` harus bersih (commit dokumen dulu). Perbaikan kecil dimulai dari `main` yang bersih, bukan dari branch fitur.
 
 ## 9. Format CHANGE REQUEST
 
