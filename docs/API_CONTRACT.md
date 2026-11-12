@@ -6,61 +6,61 @@
 
 ## 1. Konvensi umum
 
-| Hal | Aturan |
-|---|---|
-| Base URL | `{host}/api` (emulator Android: `http://10.0.2.2:8000/api`) |
-| Auth | `Authorization: Bearer <token>` (Laravel Sanctum). Endpoint publik dan guest tanpa token |
-| Header | Selalu kirim `Accept: application/json` |
-| Sukses | `{ "success": true, "message": "...", "data": ... }` |
-| Gagal | `{ "success": false, "message": "...", "errors": { "field": ["pesan"] } }` (`errors` hanya untuk 422) |
-| Status code | 200 OK · 201 dibuat · 401 belum login/token salah · 403 role/akses salah · 404 tidak ada (juga untuk guest tidak cocok) · 409 konflik state (jadwal bentrok, order sudah diambil mitra lain, transisi tidak valid) · 422 validasi · 429 throttle |
-| Pagination | `?page=1&per_page=15` → `data: [...]`, `meta: { current_page, last_page, per_page, total }`. `per_page` dibatasi 1-50 |
-| Waktu | ISO 8601 + offset WIB, mis. `2026-11-20T10:00:00+07:00` |
-| Uang | **integer rupiah** (`150000`), bukan string/float |
-| ID | integer. `mitra_id` = `mitra_profiles.id`; `user_id` = `users.id` (jangan tertukar) |
-| Telepon | string format lokal `08…` (normalisasi `+62`/`62` → `0`) |
-| Penamaan field | `snake_case`, sama dengan nama kolom DB bila ada padanannya |
-| Throttle | `POST /auth/login` 10/menit · `POST /orders` 20/menit · akses guest: hanya percobaan **gagal** yang dihitung, 5/menit per IP + `order_code` (CR-10) |
+| Hal            | Aturan                                                                                                                                                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Base URL       | `{host}/api` (emulator Android: `http://10.0.2.2:8000/api`)                                                                                                                                                                                      |
+| Auth           | `Authorization: Bearer <token>` (Laravel Sanctum). Endpoint publik dan guest tanpa token                                                                                                                                                         |
+| Header         | Selalu kirim `Accept: application/json`                                                                                                                                                                                                          |
+| Sukses         | `{ "success": true, "message": "...", "data": ... }`                                                                                                                                                                                             |
+| Gagal          | `{ "success": false, "message": "...", "errors": { "field": ["pesan"] } }` (`errors` hanya untuk 422)                                                                                                                                            |
+| Status code    | 200 OK · 201 dibuat · 401 belum login/token salah · 403 role/akses salah · 404 tidak ada (juga untuk guest tidak cocok) · 409 konflik state (jadwal bentrok, order sudah diambil mitra lain, transisi tidak valid) · 422 validasi · 429 throttle |
+| Pagination     | `?page=1&per_page=15` → `data: [...]`, `meta: { current_page, last_page, per_page, total }`. `per_page` dibatasi 1-50                                                                                                                            |
+| Waktu          | ISO 8601 + offset WIB, mis. `2026-11-20T10:00:00+07:00`                                                                                                                                                                                          |
+| Uang           | **integer rupiah** (`150000`), bukan string/float                                                                                                                                                                                                |
+| ID             | integer. `mitra_id` = `mitra_profiles.id`; `user_id` = `users.id` (jangan tertukar)                                                                                                                                                              |
+| Telepon        | string format lokal `08…` (normalisasi `+62`/`62` → `0`)                                                                                                                                                                                         |
+| Penamaan field | `snake_case`, sama dengan nama kolom DB bila ada padanannya                                                                                                                                                                                      |
+| Throttle       | `POST /auth/login` 10/menit · `POST /orders` 20/menit · akses guest: hanya percobaan **gagal** yang dihitung, 5/menit per IP + `order_code` (CR-10)                                                                                              |
 
 ## 2. Auth
 
-| Method | Path | Akses | Isi utama |
-|---|---|---|---|
-| POST | `/auth/register/customer` | publik | `full_name`, `phone`, `password`, `password_confirmation`, `address` (label, full_address, city?, province?, postal_code?) |
-| POST | `/auth/register/mitra` | publik | `full_name`, `phone`, `password`, `password_confirmation`, `bio?`, `service_area?` |
-| POST | `/auth/login` | publik | `phone`, `password` → `token`, `user`, `mitra_id?` |
-| POST | `/auth/logout` | login | |
-| GET | `/auth/me` | login | profil + `mitra_id` jika mitra |
+| Method | Path                      | Akses  | Isi utama                                                                                                                  |
+| ------ | ------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/auth/register/customer` | publik | `full_name`, `phone`, `password`, `password_confirmation`, `address` (label, full_address, city?, province?, postal_code?) |
+| POST   | `/auth/register/mitra`    | publik | `full_name`, `phone`, `password`, `password_confirmation`, `bio?`, `service_area?`                                         |
+| POST   | `/auth/login`             | publik | `phone`, `password` → `token`, `user`, `mitra_id?`                                                                         |
+| POST   | `/auth/logout`            | login  |                                                                                                                            |
+| GET    | `/auth/me`                | login  | profil + `mitra_id` jika mitra                                                                                             |
 
 Catatan: register mitra membuat `users` + `mitra_profiles` dalam satu transaksi. `verification_status` awal mengikuti `MITRA_AUTO_APPROVE` (DECISIONS D-15). Register mengembalikan token (CR-04), admin ditolak login lewat API (CR-05).
 
 ## 3. Katalog (publik)
 
-| Method | Path | Isi utama |
-|---|---|---|
-| GET | `/service-categories` | kategori aktif |
-| GET | `/services?category_id=` | jasa aktif |
-| GET | `/services/{id}` | detail jasa + `addons[]` aktif + `prices[]` (per `property_size`, dikelompokkan per `property_type`) |
-| GET | `/property-types` | jenis properti aktif + `sizes[]` |
-| GET | `/slots?service_id=&date=YYYY-MM-DD` | **daftar** (CR-09) 6 slot 2 jam hari itu: `[ {start, end, available} ]`. `available` = slot cukup jauh dari sekarang (`MIN_LEAD_MINUTES`) **dan** ada ≥ 1 mitra eligible yang bebas |
-| POST | `/orders/quote` | `service_id`, `property_size_id`, `addons[{service_addon_id, quantity}]` → rincian harga (tidak menyimpan apa pun) |
+| Method | Path                                 | Isi utama                                                                                                                                                                           |
+| ------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/service-categories`                | kategori aktif                                                                                                                                                                      |
+| GET    | `/services?category_id=`             | jasa aktif                                                                                                                                                                          |
+| GET    | `/services/{id}`                     | detail jasa + `addons[]` aktif + `prices[]` (per `property_size`, dikelompokkan per `property_type`)                                                                                |
+| GET    | `/property-types`                    | jenis properti aktif + `sizes[]`                                                                                                                                                    |
+| GET    | `/slots?service_id=&date=YYYY-MM-DD` | **daftar** (CR-09) 6 slot 2 jam hari itu: `[ {start, end, available} ]`. `available` = slot cukup jauh dari sekarang (`MIN_LEAD_MINUTES`) **dan** ada ≥ 1 mitra eligible yang bebas |
+| POST   | `/orders/quote`                      | `service_id`, `property_size_id`, `addons[{service_addon_id, quantity}]` → rincian harga (tidak menyimpan apa pun)                                                                  |
 
 ## 4. Pesanan, pembayaran, guest
 
 Akses pesanan: **login** (pemilik) atau **guest** dengan `order_code` + `phone` pada body/query. Tidak cocok → 404 generik + throttle (B-9).
 
-| Method | Path | Akses | Isi utama |
-|---|---|---|---|
-| POST | `/orders` | guest/login | `service_id`, `property_size_id`, `addons[]`, `scheduled_at`, `customer_name`, `customer_phone`, `service_address`, `address_notes?`, `customer_note?`, `customer_address_id?` → 201 order + `order_code`. 409: slot tanpa mitra eligible atau pesanan identik masih berjalan. 422: bukan slot valid atau terlalu dekat (CR-11) |
-| POST | `/orders/track` | guest | `order_code`, `phone` → order |
-| GET | `/orders/{order_code}` | login (pemilik) | order |
-| GET | `/customer/orders` | login customer | riwayat (paginasi) |
-| GET | `/orders/{order_code}/status-history` | pemilik/guest | riwayat status |
-| POST | `/orders/{order_code}/cancel` | pemilik/guest | `reason?` (§10.9) |
-| POST | `/orders/{order_code}/confirm-completion` | pemilik/guest | hanya dari `mitra_completed` (§10.9) |
-| GET | `/orders/{order_code}/payment` | pemilik/guest | status bayar terbaru (§10.9). Pada P4b: jika `pending`, backend boleh menanyakan Midtrans Status API |
-| POST | `/orders/{order_code}/payments` | pemilik/guest | **P4b, belum ada.** Membuat transaksi Snap → `snap_token`, `redirect_url`, `expired_at`. Hanya dari `waiting_payment` |
-| POST | `/webhooks/midtrans` | publik + signature | **P4b, belum ada.** Notifikasi Midtrans (lihat §7) |
+| Method | Path                                      | Akses              | Isi utama                                                                                                                                                                                                                                                                                                                       |
+| ------ | ----------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/orders`                                 | guest/login        | `service_id`, `property_size_id`, `addons[]`, `scheduled_at`, `customer_name`, `customer_phone`, `service_address`, `address_notes?`, `customer_note?`, `customer_address_id?` → 201 order + `order_code`. 409: slot tanpa mitra eligible atau pesanan identik masih berjalan. 422: bukan slot valid atau terlalu dekat (CR-11) |
+| POST   | `/orders/track`                           | guest              | `order_code`, `phone` → order                                                                                                                                                                                                                                                                                                   |
+| GET    | `/orders/{order_code}`                    | login (pemilik)    | order                                                                                                                                                                                                                                                                                                                           |
+| GET    | `/customer/orders`                        | login customer     | riwayat (paginasi)                                                                                                                                                                                                                                                                                                              |
+| GET    | `/orders/{order_code}/status-history`     | pemilik/guest      | riwayat status                                                                                                                                                                                                                                                                                                                  |
+| POST   | `/orders/{order_code}/cancel`             | pemilik/guest      | `reason?` (§10.9)                                                                                                                                                                                                                                                                                                               |
+| POST   | `/orders/{order_code}/confirm-completion` | pemilik/guest      | hanya dari `mitra_completed` (§10.9)                                                                                                                                                                                                                                                                                            |
+| GET    | `/orders/{order_code}/payment`            | pemilik/guest      | status bayar terbaru (§10.9). Pada P4b: jika `pending`, backend boleh menanyakan Midtrans Status API                                                                                                                                                                                                                            |
+| POST   | `/orders/{order_code}/payments`           | pemilik/guest      | **P4b, belum ada.** Membuat transaksi Snap → `snap_token`, `redirect_url`, `expired_at`. Hanya dari `waiting_payment`                                                                                                                                                                                                           |
+| POST   | `/webhooks/midtrans`                      | publik + signature | **P4b, belum ada.** Notifikasi Midtrans (lihat §7)                                                                                                                                                                                                                                                                              |
 
 Guest: `order_code` + `phone` dikirim di setiap request (stateless), dengan throttle (DECISIONS D-13, CR-10).
 
@@ -109,21 +109,21 @@ Guest: `order_code` + `phone` dikirim di setiap request (stateless), dengan thro
 
 Semua endpoint `/mitra/*` butuh role `mitra`: tanpa token 401, role lain 403.
 
-| Method | Path | Isi utama |
-|---|---|---|
-| GET / PUT | `/mitra/profile` | `bio`, `service_area`, `is_available` |
-| GET | `/mitra/services` | semua jasa katalog + flag `selected` |
-| PUT | `/mitra/services` | `service_ids[]` (sinkronisasi `mitra_services`; yang dilepas jadi `inactive`) |
-| GET / PUT | `/mitra/availabilities` | PUT: body dibungkus key `availabilities` (replace-all, CR-12). Isi tiap item: `day_of_week` (0=Minggu), `start_time`, `end_time`, `is_active` |
-| GET | `/mitra/offers` | penawaran berstatus `offered`, belum kedaluwarsa, order masih `searching_mitra` (tanpa `order_code`, nama/telepon/alamat customer, D-12). Isi: §10.6 (CR-13) |
-| POST | `/mitra/offers/{attempt_id}/accept` | 200 objek Order `waiting_payment`. 409 jika sudah diambil/kedaluwarsa/bentrok (§10.6) |
-| POST | `/mitra/offers/{attempt_id}/reject` | 200 `data: null`; backend lanjut ke mitra berikutnya |
-| GET | `/mitra/orders?status=` | pesanan yang ditugaskan (paginasi; `status` boleh dipisah koma) |
-| GET | `/mitra/orders/{order_code}` | detail (alamat lengkap + telepon customer tampil di sini) |
-| POST | `/mitra/orders/{order_code}/depart` | `confirmed → on_the_way` (butuh payment `paid`) |
-| POST | `/mitra/orders/{order_code}/arrive` | `on_the_way → arrived` |
-| POST | `/mitra/orders/{order_code}/start` | `arrived → in_progress` |
-| POST | `/mitra/orders/{order_code}/finish` | `in_progress → mitra_completed` |
+| Method    | Path                                | Isi utama                                                                                                                                                    |
+| --------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET / PUT | `/mitra/profile`                    | `bio`, `service_area`, `is_available`                                                                                                                        |
+| GET       | `/mitra/services`                   | semua jasa katalog + flag `selected`                                                                                                                         |
+| PUT       | `/mitra/services`                   | `service_ids[]` (sinkronisasi `mitra_services`; yang dilepas jadi `inactive`)                                                                                |
+| GET / PUT | `/mitra/availabilities`             | PUT: body dibungkus key `availabilities` (replace-all, CR-12). Isi tiap item: `day_of_week` (0=Minggu), `start_time`, `end_time`, `is_active`                |
+| GET       | `/mitra/offers`                     | penawaran berstatus `offered`, belum kedaluwarsa, order masih `searching_mitra` (tanpa `order_code`, nama/telepon/alamat customer, D-12). Isi: §10.6 (CR-13) |
+| POST      | `/mitra/offers/{attempt_id}/accept` | 200 objek Order `waiting_payment`. 409 jika sudah diambil/kedaluwarsa/bentrok (§10.6)                                                                        |
+| POST      | `/mitra/offers/{attempt_id}/reject` | 200 `data: null`; backend lanjut ke mitra berikutnya                                                                                                         |
+| GET       | `/mitra/orders?status=`             | pesanan yang ditugaskan (paginasi; `status` boleh dipisah koma)                                                                                              |
+| GET       | `/mitra/orders/{order_code}`        | detail (alamat lengkap + telepon customer tampil di sini)                                                                                                    |
+| POST      | `/mitra/orders/{order_code}/depart` | `confirmed → on_the_way` (butuh payment `paid`)                                                                                                              |
+| POST      | `/mitra/orders/{order_code}/arrive` | `on_the_way → arrived`                                                                                                                                       |
+| POST      | `/mitra/orders/{order_code}/start`  | `arrived → in_progress`                                                                                                                                      |
+| POST      | `/mitra/orders/{order_code}/finish` | `in_progress → mitra_completed`                                                                                                                              |
 
 Khusus development (CR-14): `POST /dev/orders/{order_code}/simulate-paid`. Rute **selalu terdaftar**, tetapi service membalas 404 jika `APP_ENV` bukan `local` (supaya bisa dites otomatis). Bukan pengganti Midtrans: dosen mensyaratkan minimal 1 API eksternal (DECISIONS Q-1).
 
@@ -131,19 +131,19 @@ Khusus development (CR-14): `POST /dev/orders/{order_code}/simulate-paid`. Rute 
 
 ### 6.1 Transisi yang diizinkan
 
-| Dari | Ke | Pelaku | Syarat |
-|---|---|---|---|
-| (baru) | `pending` → `searching_mitra` | sistem | dalam request yang sama saat order dibuat |
-| `searching_mitra` | `waiting_payment` | mitra | accept lolos B-5 |
-| `searching_mitra` | `cancelled` | sistem / customer | batas percobaan habis / customer batal |
-| `waiting_payment` | `confirmed` | sistem | pembayaran `paid` terverifikasi |
-| `waiting_payment` | `cancelled` | sistem / customer | bayar kedaluwarsa atau gagal final / customer batal (tanpa refund) |
-| `confirmed` | `on_the_way` | mitra | pembayaran `paid` |
-| `on_the_way` | `arrived` | mitra | |
-| `arrived` | `in_progress` | mitra | |
-| `in_progress` | `mitra_completed` | mitra | |
-| `mitra_completed` | `completed` | customer / sistem | konfirmasi customer, atau otomatis setelah N jam (D-07) |
-| `confirmed`, `on_the_way`, `arrived` | `cancelled` | customer / admin | pembayaran → `refund_pending` (D-08) |
+| Dari                                 | Ke                            | Pelaku            | Syarat                                                             |
+| ------------------------------------ | ----------------------------- | ----------------- | ------------------------------------------------------------------ |
+| (baru)                               | `pending` → `searching_mitra` | sistem            | dalam request yang sama saat order dibuat                          |
+| `searching_mitra`                    | `waiting_payment`             | mitra             | accept lolos B-5                                                   |
+| `searching_mitra`                    | `cancelled`                   | sistem / customer | batas percobaan habis / customer batal                             |
+| `waiting_payment`                    | `confirmed`                   | sistem            | pembayaran `paid` terverifikasi                                    |
+| `waiting_payment`                    | `cancelled`                   | sistem / customer | bayar kedaluwarsa atau gagal final / customer batal (tanpa refund) |
+| `confirmed`                          | `on_the_way`                  | mitra             | pembayaran `paid`                                                  |
+| `on_the_way`                         | `arrived`                     | mitra             |                                                                    |
+| `arrived`                            | `in_progress`                 | mitra             |                                                                    |
+| `in_progress`                        | `mitra_completed`             | mitra             |                                                                    |
+| `mitra_completed`                    | `completed`                   | customer / sistem | konfirmasi customer, atau otomatis setelah N jam (D-07)            |
+| `confirmed`, `on_the_way`, `arrived` | `cancelled`                   | customer / admin  | pembayaran → `refund_pending` (D-08)                               |
 
 Transisi lain **ditolak** dengan 409. Setiap transisi menulis `order_status_histories`.
 Jadwal mitra dianggap terpakai sejak `waiting_payment` sampai `completed`/`cancelled` (`OrderStatus::SCHEDULE_BLOCKING` = `waiting_payment` … `mitra_completed`).
@@ -151,15 +151,15 @@ Pembatalan customer dari `in_progress`, `mitra_completed`, `completed` ditolak 4
 
 ### 6.2 `tracking_stage` (turunan untuk UI customer, dokumen desain §11.2)
 
-| `order_status` | `tracking_stage` | Label UI |
-|---|---|---|
-| `pending`, `searching_mitra` | `searching` | Mencari mitra |
-| `waiting_payment` | `waiting` | Menunggu pembayaran |
-| `confirmed` | `confirmed` | Pesanan Dikonfirmasi |
-| `on_the_way`, `arrived`, `in_progress` | `working` | Pengerjaan |
-| `mitra_completed` | `awaiting_confirmation` | Menunggu konfirmasi Anda |
-| `completed` | `done` | Selesai |
-| `cancelled` | `cancelled` | Dibatalkan |
+| `order_status`                         | `tracking_stage`        | Label UI                 |
+| -------------------------------------- | ----------------------- | ------------------------ |
+| `pending`, `searching_mitra`           | `searching`             | Mencari mitra            |
+| `waiting_payment`                      | `waiting`               | Menunggu pembayaran      |
+| `confirmed`                            | `confirmed`             | Pesanan Dikonfirmasi     |
+| `on_the_way`, `arrived`, `in_progress` | `working`               | Pengerjaan               |
+| `mitra_completed`                      | `awaiting_confirmation` | Menunggu konfirmasi Anda |
+| `completed`                            | `done`                  | Selesai                  |
+| `cancelled`                            | `cancelled`             | Dibatalkan               |
 
 ## 7. Pembayaran Midtrans (P4b, **belum diimplementasi**)
 
@@ -168,13 +168,13 @@ Seluruh bagian ini masih rencana. Paket `midtrans/midtrans-php` disetujui dan di
 - Snap dibuat dari backend (library resmi PHP). `gross_amount` = integer rupiah = `payments.amount`.
 - `payments.payment_status` dipetakan dari `transaction_status` Midtrans (verifikasi ulang ke dokumen Midtrans saat implementasi):
 
-| Dari Midtrans | `payment_status` kita |
-|---|---|
-| `settlement`; `capture` dengan `fraud_status=accept` | `paid` |
-| `pending` | `pending` |
-| `deny`, `cancel`, `failure` | `failed` |
-| `expire` | `expired` |
-| `refund`, `partial_refund` | `refunded` |
+| Dari Midtrans                                        | `payment_status` kita |
+| ---------------------------------------------------- | --------------------- |
+| `settlement`; `capture` dengan `fraud_status=accept` | `paid`                |
+| `pending`                                            | `pending`             |
+| `deny`, `cancel`, `failure`                          | `failed`              |
+| `expire`                                             | `expired`             |
+| `refund`, `partial_refund`                           | `refunded`            |
 
 - Urutan penanganan notifikasi: validasi signature → cari payment lewat `gateway_order_id` → abaikan jika status baru "lebih mundur" dari yang tersimpan → cocokkan amount → update (dalam transaksi) → jika `paid` dan order `waiting_payment`, panggil `OrderStatusService` ke `confirmed` → balas 200.
 - Webhook butuh URL publik. Untuk dev lokal pakai tunnel (ngrok; URL berubah tiap restart, jadi **Payment Notification URL** di dashboard Sandbox harus diperbarui), atau gunakan fallback Status API.
@@ -186,13 +186,13 @@ Rute web di bawah `/admin` (guard `web`): `login`, `dashboard`, dan resource `us
 
 ## 9. Command terjadwal
 
-| Command | Fungsi | Jadwal | Status |
-|---|---|---|---|
-| `orders:process-expired-offers` | tandai attempt `expired` lalu tawarkan ke mitra berikutnya atau batalkan | tiap menit | **ada, terdaftar di `Kernel.php`** |
-| `payments:expire-pending` | payment `pending` yang lewat `expired_at` → `expired`; order `waiting_payment` yang batas bayarnya habis → `cancelled` | tiap menit | **ada, terdaftar di `Kernel.php`** |
-| `orders:auto-complete` | `mitra_completed` yang lewat N jam → `completed` | tiap jam | **ada, terdaftar di `Kernel.php`** |
+| Command                         | Fungsi                                                                                                                 | Jadwal     | Status                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------- |
+| `orders:process-expired-offers` | tandai attempt `expired` lalu tawarkan ke mitra berikutnya atau batalkan                                               | tiap menit | **ada, terdaftar di `Kernel.php`** |
+| `payments:expire-pending`       | payment `pending` yang lewat `expired_at` → `expired`; order `waiting_payment` yang batas bayarnya habis → `cancelled` | tiap menit | **ada, terdaftar di `Kernel.php`** |
+| `orders:auto-complete`          | `mitra_completed` yang lewat N jam → `completed`                                                                       | tiap jam   | **ada, terdaftar di `Kernel.php`** |
 
-Logika yang sama dipanggil secara lazy dari endpoint baca (B-15). Lazy expiry juga berlaku untuk expiry bayar dan auto-complete di GET /orders/{kode}, /orders/track, /orders/{kode}/status-history, /orders/{kode}/payment, /customer/orders, dan /mitra/orders* (OrderExpiryService::refresh). Batas bayar D-06 dihitung dari waktu transisi `waiting_payment` di `order_status_histories`, bukan dari `payments.expired_at`, karena order yang customer-nya belum membuka pembayaran tidak punya baris `payments` (D-24).
+Logika yang sama dipanggil secara lazy dari endpoint baca (B-15). Lazy expiry juga berlaku untuk expiry bayar dan auto-complete di GET /orders/{kode}, /orders/track, /orders/{kode}/status-history, /orders/{kode}/payment, /customer/orders, dan /mitra/orders\* (OrderExpiryService::refresh). Batas bayar D-06 dihitung dari waktu transisi `waiting_payment` di `order_status_histories`, bukan dari `payments.expired_at`, karena order yang customer-nya belum membuka pembayaran tidak punya baris `payments` (D-24).
 
 ## 10. Contoh respons (dari backend yang sudah berjalan)
 
@@ -285,7 +285,7 @@ Error bisnis (401, 403, 404, 409, 422 dari service) hanya punya `success` dan `m
 
 - `GET /services` (daftar) isinya sama tanpa `addons` dan `prices`.
 - `GET /property-types` → `[ { "id", "type_name", "sizes": [ { "id", "size_name", "min_area", "max_area" } ] } ]`
-- Jasa yang tidak ada atau nonaktif → 404.
+- - Jasa yang tidak ada, nonaktif, atau berada di kategori nonaktif → 404.
 
 ### 10.4 Quote
 
@@ -329,7 +329,7 @@ Error bisnis (401, 403, 404, 409, 422 dari service) hanya punya `success` dan `m
 ```
 
 - `quantity` default 1, maksimal 20. `addons` boleh kosong atau dihilangkan.
-- 422 jika: jasa atau ukuran tidak aktif, kombinasi jasa + ukuran tidak punya harga aktif, atau ada add-on yang bukan milik jasa itu.
+- 422 jika: jasa (atau kategorinya) atau ukuran tidak aktif, kombinasi jasa + ukuran tidak punya harga aktif, atau ada add-on yang bukan milik jasa itu.
 - `/orders/quote` tidak menyimpan apa pun.
 
 ### 10.5 Mitra: profil, jasa, jadwal
@@ -411,12 +411,12 @@ Error: 403 mitra belum approved/akun tidak aktif · 404 tawaran bukan milik mitr
 
 `POST /mitra/orders/{order_code}/depart | arrive | start | finish` → 200, objek Order dengan status baru:
 
-| Endpoint | Dari → Ke |
-|---|---|
+| Endpoint | Dari → Ke                                         |
+| -------- | ------------------------------------------------- |
 | `depart` | `confirmed` → `on_the_way` (butuh payment `paid`) |
-| `arrive` | `on_the_way` → `arrived` |
-| `start` | `arrived` → `in_progress` |
-| `finish` | `in_progress` → `mitra_completed` |
+| `arrive` | `on_the_way` → `arrived`                          |
+| `start`  | `arrived` → `in_progress`                         |
+| `finish` | `in_progress` → `mitra_completed`                 |
 
 Error: 404 bukan pesanan milik mitra · 409 status tidak sesuai urutan / sudah dibatalkan / belum dibayar. Setelah `finish`, customer mengonfirmasi lewat `/orders/{kode}/confirm-completion` (P4a).
 
@@ -429,6 +429,7 @@ Error: 404 bukan pesanan milik mitra · 409 status tidak sesuai urutan / sudah d
 Akses seperti §4: customer login (pemilik) tanpa `phone`, atau guest dengan `phone` (body untuk POST, query untuk GET). Tidak cocok → 404 generik + throttle (D-13).
 
 `POST /orders/{order_code}/cancel` body `{ "phone": "08...", "reason": "opsional, maks 255" }` → 200, objek Order (§4) berstatus `cancelled`.
+
 - Boleh dari `searching_mitra`, `waiting_payment`, `confirmed`, `on_the_way`, `arrived`. Dari `in_progress`, `mitra_completed`, `completed`, atau yang sudah `cancelled` → 409.
 - Jika payment sudah `paid`: payment jadi `refund_pending` dan `refund_amount` = nominal penuh (admin memproses manual, D-08). Payment `pending` tidak diubah.
 - Tawaran mitra yang masih menggantung ikut ditutup.
@@ -436,6 +437,7 @@ Akses seperti §4: customer login (pemilik) tanpa `phone`, atau guest dengan `ph
 `POST /orders/{order_code}/confirm-completion` body `{ "phone": "08..." }` → 200, objek Order berstatus `completed`. Hanya dari `mitra_completed`, selain itu 409.
 
 `GET /orders/{order_code}/payment?phone=08...` → 200
+
 ```json
 {
   "order_code": "JR-7K2M9QXD",
@@ -451,6 +453,7 @@ Akses seperti §4: customer login (pemilik) tanpa `phone`, atau guest dengan `ph
   }
 }
 ```
+
 `payment` bernilai `null` jika belum ada transaksi bayar (bukan 404). Flutter memanggil ini berulang setelah WebView pembayaran ditutup (F-8). Pada P4b, jika status masih `pending`, backend boleh menanyakan Midtrans Status API.
 
 ### 10.10 Slot, buat pesanan, lacak, riwayat
@@ -510,21 +513,21 @@ Urut dari yang paling lama. Baris pertama diperkirakan punya `old_status: null` 
 
 Acuan: `php artisan test` = 101 tes lulus, 720 assertion (branch `feat/payment-expiry`). "Dites otomatis" = ada tes PHPUnit yang lulus. Tes memeriksa respons API, belum diverifikasi lewat Postman (P6).
 
-| Grup endpoint | Status kode | Dites otomatis | Catatan |
-|---|---|---|---|
-| Auth (`/auth/*`) | selesai (P1) | ya (`AuthTest`, 7 tes) | |
-| Katalog (`/service-categories`, `/services`, `/property-types`) | selesai (P1) | ya (`CatalogQuoteTest`) | |
-| `/orders/quote` | selesai (P1) | ya (`CatalogQuoteTest`, 8 tes bersama katalog) | dua dugaan bug (harga string, quantity negatif) tidak terbukti |
-| `/slots` | selesai (P2a) | ya (`SlotAndCreateOrderTest`) | |
-| `POST /orders`, `/orders/track`, `GET /orders/{kode}`, `/customer/orders`, status-history | selesai (P2a) | ya (`SlotAndCreateOrderTest`, `TrackAndLifecycleTest`, `OrderExpiryTest`) | |
-| Matching + `orders:process-expired-offers` + lazy expiry offer | selesai (P2b) | ya (`TrackAndLifecycleTest`, `MitraOfferTest`) | |
-| `/mitra/profile`, `/mitra/services`, `/mitra/availabilities` | selesai (P3a) | ya (`MitraSetupTest`, 10 tes) | |
-| `/mitra/offers` + accept/reject | selesai (P3b) | ya (`MitraOfferTest`, 12 tes) | tes "accept bersamaan" membuktikan re-check, **bukan** race sungguhan (lihat bawah) |
-| `/mitra/orders*` + depart/arrive/start/finish | selesai (P3c) | ya (`MitraOrderTest`, 14 tes) | |
-| `/dev/orders/{kode}/simulate-paid` | selesai (P3c) | ya (di `MitraOrderTest`) | hanya `APP_ENV=local` |
-| `cancel`, `confirm-completion`, `GET payment` | selesai (P4a) | ya (`CustomerOrderActionTest`, 17 tes) | |
-| `payments:expire-pending`, `orders:auto-complete`, lazy expiry bayar | selesai (P4c) | ya (`OrderExpiryTest`, 12 tes) | `OrderExpiryService` |
-| `POST /orders/{kode}/payments`, `/webhooks/midtrans` | **belum** (P4b) | - | menunggu akun Sandbox |
-| Admin Blade `/admin/*` | **belum** (P5) | - | |
+| Grup endpoint                                                                             | Status kode     | Dites otomatis                                                            | Catatan                                                                             |
+| ----------------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Auth (`/auth/*`)                                                                          | selesai (P1)    | ya (`AuthTest`, 7 tes)                                                    |                                                                                     |
+| Katalog (`/service-categories`, `/services`, `/property-types`)                           | selesai (P1)    | ya (`CatalogQuoteTest`)                                                   |                                                                                     |
+| `/orders/quote`                                                                           | selesai (P1)    | ya (`CatalogQuoteTest`, 8 tes bersama katalog)                            | dua dugaan bug (harga string, quantity negatif) tidak terbukti                      |
+| `/slots`                                                                                  | selesai (P2a)   | ya (`SlotAndCreateOrderTest`)                                             |                                                                                     |
+| `POST /orders`, `/orders/track`, `GET /orders/{kode}`, `/customer/orders`, status-history | selesai (P2a)   | ya (`SlotAndCreateOrderTest`, `TrackAndLifecycleTest`, `OrderExpiryTest`) |                                                                                     |
+| Matching + `orders:process-expired-offers` + lazy expiry offer                            | selesai (P2b)   | ya (`TrackAndLifecycleTest`, `MitraOfferTest`)                            |                                                                                     |
+| `/mitra/profile`, `/mitra/services`, `/mitra/availabilities`                              | selesai (P3a)   | ya (`MitraSetupTest`, 10 tes)                                             |                                                                                     |
+| `/mitra/offers` + accept/reject                                                           | selesai (P3b)   | ya (`MitraOfferTest`, 12 tes)                                             | tes "accept bersamaan" membuktikan re-check, **bukan** race sungguhan (lihat bawah) |
+| `/mitra/orders*` + depart/arrive/start/finish                                             | selesai (P3c)   | ya (`MitraOrderTest`, 14 tes)                                             |                                                                                     |
+| `/dev/orders/{kode}/simulate-paid`                                                        | selesai (P3c)   | ya (di `MitraOrderTest`)                                                  | hanya `APP_ENV=local`                                                               |
+| `cancel`, `confirm-completion`, `GET payment`                                             | selesai (P4a)   | ya (`CustomerOrderActionTest`, 17 tes)                                    |                                                                                     |
+| `payments:expire-pending`, `orders:auto-complete`, lazy expiry bayar                      | selesai (P4c)   | ya (`OrderExpiryTest`, 12 tes)                                            | `OrderExpiryService`                                                                |
+| `POST /orders/{kode}/payments`, `/webhooks/midtrans`                                      | **belum** (P4b) | -                                                                         | menunggu akun Sandbox                                                               |
+| Admin Blade `/admin/*`                                                                    | **belum** (P5)  | -                                                                         |                                                                                     |
 
 Catatan race: (pertahankan paragraf lama persis)

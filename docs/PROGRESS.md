@@ -19,7 +19,7 @@
 | 3 langkah berikutnya (backend)  | 1) **T1:** tes catch-up B-13 (tulis ulang 34 tes, target 89 hijau). 2) **T2:** P4c — `payments:expire-pending`, `orders:auto-complete`, lazy expiry. 3) **T3:** P5 admin Blade.                                                                                                                              |
 | Pekerjaan paralel (Flutter)     | 1) Flutter Foundation selesai: scaffold Customer App dan Mitra App, integrasi Shared Core, konfigurasi dependency, serta pengujian dasar. 2) Berikutnya: mulai pengembangan UI dan alur Customer App. 3) Lanjutkan fondasi UI dan alur Mitra App. Pekerjaan dilakukan pada branch `feat/flutter-foundation`. |
 | Cara menjalankan                | `cd backend` → `php artisan migrate:fresh --seed` → `php artisan serve --host=0.0.0.0 --port=8000`; terminal lain `php artisan schedule:work`. Tes: `php artisan test` (MySQL DB `jasa_rumahan_test` harus ada, lihat README).                                                                               |
-|  |
+|                                 |
 
 ## Versi terpasang (dari output perintah)
 
@@ -209,14 +209,23 @@ Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelu
   2. Implementasikan alur Customer berdasarkan API Contract.
   3. Mulai fondasi UI Mitra App.
 
+### 2026-11-12 · T2 P4c expiry bayar + auto-complete selesai
+
+- AI: Claude · Fase: P4 (P4c selesai)
+- Selesai: `OrderExpiryService` (expiry bayar D-06/D-24, auto-complete D-07, lazy expiry B-15), command `payments:expire-pending` dan `orders:auto-complete`, ketiga command terdaftar di `Kernel.php`. Lazy expiry dipanggil di show, track, status-history, payment, customer/orders, dan /mitra/orders\*. `OrderExpiryTest` 12 tes. `php artisan test`: 101 lulus, 720 assertion. Branch `feat/payment-expiry`, commit kode `8c36a47`, dokumen `320afe3` dan `38d2dda`, sudah di-push. API_CONTRACT (§9, §10.10, §11) dan DECISIONS sudah disinkronkan.
+- Setengah jadi: uji manual PAYMENT_EXPIRY_MINUTES=1 lewat Postman belum dilakukan. Review ChatGPT masih ditunda sampai backend selesai.
+- Keputusan baru: tidak ada. D-22, D-23, D-24 dipakai sebagai asumsi kerja, masih USULAN.
+- Bug diketahui: tidak ada. Ditemukan: jasa di kategori nonaktif masih lolos di detail, quote, slots, dan order (ditangani CR-16 di T3-0).
+- Berikutnya: 1) T3 P5 Admin Blade. 2) T4 P4b Midtrans (butuh akun Sandbox). 3) Flutter paralel di ChatGPT.
+
 ### 2026-11-11 · T1 tes catch-up B-13 selesai
 
 - AI: Claude · Fase: P4 (antara P4a dan T2)
-- Selesai: 4 file tes baru (Auth 7, Catalog+Quote 8, SlotAndCreateOrder 10, TrackAndLifecycle 9 = 34 tes). `php artisan test`: 89 lulus, 655 assertion. Branch `feat/test-catchup-b13`, commit tes `eb00a17`, commit dokumen `2f7dc6c`, sudah di-push.
-- Setengah jadi: bundel ChatGPT belum dikonfirmasi diunggah. Review ChatGPT masih ditunda sampai backend selesai.
+- Selesai: 4 file tes baru (Auth 7, Catalog+Quote 8, SlotAndCreateOrder 10, TrackAndLifecycle 9 = 34 tes). `php artisan test`: 89 lulus, 655 assertion. Branch `feat/test-catchup-b13`, commit tes `eb00a17`, dokumen `2f7dc6c`, sudah di-push.
+- Setengah jadi: bundel ChatGPT belum dikonfirmasi diunggah. Review ChatGPT ditunda sampai backend selesai.
 - Keputusan baru: tidak ada.
-- Bug diketahui: dua dugaan (harga string lolos, quantity negatif) TIDAK terbukti oleh tes. Temuan kecil: GET /services/{id} tidak cek kategori aktif (usul: tangani di T3 lewat CR).
-- Berikutnya: 1) T2 P4c expiry bayar + auto-complete. 2) T3 P5 admin Blade. 3) Flutter paralel di ChatGPT.
+- Bug diketahui: dua dugaan (harga string lolos, quantity negatif) TIDAK terbukti oleh tes.
+- Berikutnya: 1) T2 P4c. 2) T3 P5 Admin Blade. 3) Flutter paralel di ChatGPT.
 
 <!-- Salin blok ini untuk sesi berikutnya, tempel DI ATAS entri terbaru:
 ### YYYY-MM-DD · judul singkat
