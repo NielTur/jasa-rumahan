@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -21,6 +22,14 @@ class Service extends Model
         'duration_minutes' => 'integer',
         'is_active' => 'boolean',
     ];
+
+    // CR-16: jasa yang boleh tampil dan dipesan = jasa aktif DAN kategorinya aktif.
+    // Dipakai di katalog, quote, slots, buat order, dan pilihan jasa mitra.
+    public function scopeBookable(Builder $query): Builder
+    {
+        return $query->where('services.is_active', true)
+            ->whereHas('category', fn($c) => $c->where('is_active', true));
+    }
 
     public function category(): BelongsTo
     {

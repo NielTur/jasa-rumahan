@@ -26,7 +26,8 @@ class MitraSetupService
             ->pluck('services.id')
             ->all();
 
-        return Service::where('is_active', true)
+        // CR-16: hanya jasa yang boleh dipesan (aktif dan kategorinya aktif)
+        return Service::bookable()
             ->orderBy('id')
             ->get()
             ->each(fn($s) => $s->selected = in_array($s->id, $aktif));
