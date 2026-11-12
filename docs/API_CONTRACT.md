@@ -189,10 +189,10 @@ Rute web di bawah `/admin` (guard `web`): `login`, `dashboard`, dan resource `us
 | Command | Fungsi | Jadwal | Status |
 |---|---|---|---|
 | `orders:process-expired-offers` | tandai attempt `expired` lalu tawarkan ke mitra berikutnya atau batalkan | tiap menit | **ada, terdaftar di `Kernel.php`** |
-| `payments:expire-pending` | `pending` yang lewat `expired_at` → `expired`; order → `cancelled` | tiap menit | P4c, belum ada |
-| `orders:auto-complete` | `mitra_completed` yang lewat N jam → `completed` | tiap jam | P4c, belum ada |
+| `payments:expire-pending` | payment `pending` yang lewat `expired_at` → `expired`; order `waiting_payment` yang batas bayarnya habis → `cancelled` | tiap menit | **ada, terdaftar di `Kernel.php`** |
+| `orders:auto-complete` | `mitra_completed` yang lewat N jam → `completed` | tiap jam | **ada, terdaftar di `Kernel.php`** |
 
-Logika yang sama dipanggil secara lazy dari endpoint baca (B-15). Saat ini lazy expiry hanya untuk offer (`MatchingService::refreshIfSearching`); expiry bayar dan auto-complete menyusul di P4c. Batas bayar D-06 dihitung dari waktu transisi `waiting_payment` di `order_status_histories`, bukan dari `payments.expired_at`, karena order yang customer-nya belum membuka pembayaran tidak punya baris `payments` (D-24).
+Logika yang sama dipanggil secara lazy dari endpoint baca (B-15). Lazy expiry juga berlaku untuk expiry bayar dan auto-complete di GET /orders/{kode}, /orders/track, /orders/{kode}/status-history, /orders/{kode}/payment, /customer/orders, dan /mitra/orders* (OrderExpiryService::refresh). Batas bayar D-06 dihitung dari waktu transisi `waiting_payment` di `order_status_histories`, bukan dari `payments.expired_at`, karena order yang customer-nya belum membuka pembayaran tidak punya baris `payments` (D-24).
 
 ## 10. Contoh respons (dari backend yang sudah berjalan)
 
@@ -506,25 +506,25 @@ Akses seperti §4: customer login (pemilik) tanpa `phone`, atau guest dengan `ph
 
 Urut dari yang paling lama. Baris pertama diperkirakan punya `old_status: null` (belum diverifikasi; cek saat tes catch-up).
 
-## 11. Status implementasi (per 10 Nov 2026)
+## 11. Status implementasi (per 12 Nov 2026)
 
-Acuan: `php artisan test` = 55 tes lulus, 239 assertion (di branch `feat/order-customer-actions`). "Dites otomatis" = ada tes PHPUnit yang lulus. "Belum diuji" = kode ada, belum ada tes dan belum dicoba lewat Postman.
+Acuan: `php artisan test` = 101 tes lulus, 720 assertion (branch `feat/payment-expiry`). "Dites otomatis" = ada tes PHPUnit yang lulus. Tes memeriksa respons API, belum diverifikasi lewat Postman (P6).
 
 | Grup endpoint | Status kode | Dites otomatis | Catatan |
 |---|---|---|---|
-| Auth (`/auth/*`) | selesai (P1) | belum | dicoba manual sewaktu P1. Tes catch-up T1 |
-| Katalog (`/service-categories`, `/services`, `/property-types`) | selesai (P1) | belum | |
-| `/orders/quote` | selesai (P1) | belum | dicoba manual: 270000, 422 kombinasi tanpa harga, 422 add-on jasa lain |
-| `/slots` | selesai (P2a) | belum | |
-| `POST /orders`, `/orders/track`, `GET /orders/{kode}`, `/customer/orders`, status-history | selesai (P2a) | belum | §10.10 belum diuji Postman |
-| Matching + `orders:process-expired-offers` + lazy expiry | selesai (P2b) | belum | |
+| Auth (`/auth/*`) | selesai (P1) | ya (`AuthTest`, 7 tes) | |
+| Katalog (`/service-categories`, `/services`, `/property-types`) | selesai (P1) | ya (`CatalogQuoteTest`) | |
+| `/orders/quote` | selesai (P1) | ya (`CatalogQuoteTest`, 8 tes bersama katalog) | dua dugaan bug (harga string, quantity negatif) tidak terbukti |
+| `/slots` | selesai (P2a) | ya (`SlotAndCreateOrderTest`) | |
+| `POST /orders`, `/orders/track`, `GET /orders/{kode}`, `/customer/orders`, status-history | selesai (P2a) | ya (`SlotAndCreateOrderTest`, `TrackAndLifecycleTest`, `OrderExpiryTest`) | |
+| Matching + `orders:process-expired-offers` + lazy expiry offer | selesai (P2b) | ya (`TrackAndLifecycleTest`, `MitraOfferTest`) | |
 | `/mitra/profile`, `/mitra/services`, `/mitra/availabilities` | selesai (P3a) | ya (`MitraSetupTest`, 10 tes) | |
 | `/mitra/offers` + accept/reject | selesai (P3b) | ya (`MitraOfferTest`, 12 tes) | tes "accept bersamaan" membuktikan re-check, **bukan** race sungguhan (lihat bawah) |
 | `/mitra/orders*` + depart/arrive/start/finish | selesai (P3c) | ya (`MitraOrderTest`, 14 tes) | |
 | `/dev/orders/{kode}/simulate-paid` | selesai (P3c) | ya (di `MitraOrderTest`) | hanya `APP_ENV=local` |
 | `cancel`, `confirm-completion`, `GET payment` | selesai (P4a) | ya (`CustomerOrderActionTest`, 17 tes) | |
+| `payments:expire-pending`, `orders:auto-complete`, lazy expiry bayar | selesai (P4c) | ya (`OrderExpiryTest`, 12 tes) | `OrderExpiryService` |
 | `POST /orders/{kode}/payments`, `/webhooks/midtrans` | **belum** (P4b) | - | menunggu akun Sandbox |
-| `payments:expire-pending`, `orders:auto-complete` | **belum** (P4c) | - | |
 | Admin Blade `/admin/*` | **belum** (P5) | - | |
 
-Catatan race: PHPUnit berjalan dalam satu proses, jadi tes "dua mitra accept bersamaan" hanya membuktikan bahwa pemeriksaan ulang di dalam transaksi menolak accept kedua. Bukti `lockForUpdate` bekerja di bawah beban nyata menunggu command `dev:race-accept` (dua proses `php artisan` sekaligus, rencana P6).
+Catatan race: (pertahankan paragraf lama persis)
