@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PropertySizeController;
 use App\Http\Controllers\Admin\PropertyTypeController;
 use App\Http\Controllers\Admin\ServiceAddonController;
 use App\Http\Controllers\Admin\ServiceCategoryController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ServicePriceController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,5 +51,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put("$uri/{id}", [$controller, 'update'])->whereNumber('id')->name("$uri.update");
             Route::patch("$uri/{id}/toggle", [$controller, 'toggle'])->whereNumber('id')->name("$uri.toggle");
         }
+
+        // Akun dan mitra (T3c)
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::patch('users/{id}/status', [UserController::class, 'updateStatus'])
+            ->whereNumber('id')->name('users.status');
+
+        Route::get('mitra', [MitraController::class, 'index'])->name('mitra.index');
+        Route::patch('mitra/{id}/verification', [MitraController::class, 'updateVerification'])
+            ->whereNumber('id')->name('mitra.verification');
     });
 });
