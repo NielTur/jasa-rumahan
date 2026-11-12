@@ -4,23 +4,22 @@
 > Tempel bagian **Sekarang** ke prompt tugas (`PROMPTS.md` §C), atau pakai prompt lanjut sesi (`PROMPTS.md` §E.7). Tambahkan entri baru di paling atas **Log** setiap akhir sesi (`PROMPTS.md` §E.4).
 > Rencana kerja berikutnya yang rinci ada di [`PLAN_LANJUTAN.md`](PLAN_LANJUTAN.md).
 
-
 ## Sekarang
 
-| Item | Isi |
-|---|---|
-| Fase aktif | **P4 (backend) dan P1 (Flutter Foundation), dikerjakan secara paralel.** Urutan pekerjaan backend tetap: tes catch-up B-13 → P4c → P5 → P4b → P6 → Manual Book. |
-| Terakhir diperbarui | 11 Nov 2026 oleh GPT-6, setelah pengerjaan Flutter Foundation – Shared Core selesai. |
-| Selesai (backend, dites hijau) | P1 auth + katalog + quote · P2 slots + buat order + matching · P3a-c sisi mitra + simulate-paid · P4a cancel + confirm-completion + GET payment. `php artisan test`: **55 lulus, 239 assertion**. |
-| Setengah jadi | 1) **34 tes catch-up B-13** (P1/P2) sudah ditulis di chat sebelumnya, tetapi belum disimpan dan dijalankan; jika file hilang, perlu ditulis ulang (T1). 2) Review ChatGPT untuk P3a-P4a belum dilakukan; ditunda sampai backend selesai. |
-| Sudah dikonfirmasi (11 Nov, T0) | `php artisan key:generate` dijalankan; `.env.example` berisi `APP_KEY=` kosong dan hanya `.env.example` yang dilacak Git; repo GitHub **Private**; `SELECT COUNT(*) FROM services;` = **3**; `scripts/dump-code.ps1` berjalan (126 file, 243 KB → `chatgpt-bundle/KODE_BACKEND.txt`). |
-| Belum terkonfirmasi | `scripts/bundle-chatgpt.ps1` belum dijalankan di Windows (3 bundel ChatGPT yang diunggah dibuat Claude dengan logika yang sama). |
-| Bug yang diketahui | Dugaan, belum dibuktikan tes: harga bertipe string lolos cast; `quantity` negatif belum ditolak. Periksa melalui tes catch-up. |
-| Keputusan USULAN yang menunggu | D-22, D-23, D-24 (DECISIONS §1); Q-2, Q-4, Q-5, Q-6, Q-8, Q-9 terbuka. |
-| 3 langkah berikutnya (backend) | 1) **T1:** tes catch-up B-13 (tulis ulang 34 tes, target 89 hijau). 2) **T2:** P4c — `payments:expire-pending`, `orders:auto-complete`, lazy expiry. 3) **T3:** P5 admin Blade. |
-| Pekerjaan paralel (Flutter) | 1) Flutter Foundation selesai: scaffold Customer App dan Mitra App, integrasi Shared Core, konfigurasi dependency, serta pengujian dasar. 2) Berikutnya: mulai pengembangan UI dan alur Customer App. 3) Lanjutkan fondasi UI dan alur Mitra App. Pekerjaan dilakukan pada branch `feat/flutter-foundation`. |
-| Cara menjalankan | `cd backend` → `php artisan migrate:fresh --seed` → `php artisan serve --host=0.0.0.0 --port=8000`; terminal lain `php artisan schedule:work`. Tes: `php artisan test` (MySQL DB `jasa_rumahan_test` harus ada, lihat README). |
-                                                                         |
+| Item                            | Isi                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Fase aktif                      | **P4 (backend) dan P1 (Flutter Foundation), dikerjakan secara paralel.** Urutan pekerjaan backend tetap: tes catch-up B-13 → P4c → P5 → P4b → P6 → Manual Book.                                                                                                                                              |
+| Terakhir diperbarui             | 11 Nov 2026 oleh GPT-6, setelah pengerjaan Flutter Foundation – Shared Core selesai.                                                                                                                                                                                                                         |
+| Selesai (backend, dites hijau)  | P1 auth + katalog + quote · P2 slots + buat order + matching · P3a-c sisi mitra + simulate-paid · P4a cancel + confirm-completion + GET payment. `php artisan test`: **55 lulus, 239 assertion**.                                                                                                            |
+| Setengah jadi                   | 1) **34 tes catch-up B-13** (P1/P2) sudah ditulis di chat sebelumnya, tetapi belum disimpan dan dijalankan; jika file hilang, perlu ditulis ulang (T1). 2) Review ChatGPT untuk P3a-P4a belum dilakukan; ditunda sampai backend selesai.                                                                     |
+| Sudah dikonfirmasi (11 Nov, T0) | `php artisan key:generate` dijalankan; `.env.example` berisi `APP_KEY=` kosong dan hanya `.env.example` yang dilacak Git; repo GitHub **Private**; `SELECT COUNT(*) FROM services;` = **3**; `scripts/dump-code.ps1` berjalan (126 file, 243 KB → `chatgpt-bundle/KODE_BACKEND.txt`).                        |
+| Belum terkonfirmasi             | `scripts/bundle-chatgpt.ps1` belum dijalankan di Windows (3 bundel ChatGPT yang diunggah dibuat Claude dengan logika yang sama).                                                                                                                                                                             |
+| Bug yang diketahui              | Dugaan, belum dibuktikan tes: harga bertipe string lolos cast; `quantity` negatif belum ditolak. Periksa melalui tes catch-up.                                                                                                                                                                               |
+| Keputusan USULAN yang menunggu  | D-22, D-23, D-24 (DECISIONS §1); Q-2, Q-4, Q-5, Q-6, Q-8, Q-9 terbuka.                                                                                                                                                                                                                                       |
+| 3 langkah berikutnya (backend)  | 1) **T1:** tes catch-up B-13 (tulis ulang 34 tes, target 89 hijau). 2) **T2:** P4c — `payments:expire-pending`, `orders:auto-complete`, lazy expiry. 3) **T3:** P5 admin Blade.                                                                                                                              |
+| Pekerjaan paralel (Flutter)     | 1) Flutter Foundation selesai: scaffold Customer App dan Mitra App, integrasi Shared Core, konfigurasi dependency, serta pengujian dasar. 2) Berikutnya: mulai pengembangan UI dan alur Customer App. 3) Lanjutkan fondasi UI dan alur Mitra App. Pekerjaan dilakukan pada branch `feat/flutter-foundation`. |
+| Cara menjalankan                | `cd backend` → `php artisan migrate:fresh --seed` → `php artisan serve --host=0.0.0.0 --port=8000`; terminal lain `php artisan schedule:work`. Tes: `php artisan test` (MySQL DB `jasa_rumahan_test` harus ada, lihat README).                                                                               |
+|  |
 
 ## Versi terpasang (dari output perintah)
 
@@ -186,7 +185,6 @@ Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelu
   2. Siapkan konfigurasi awal Customer App.
   3. Siapkan konfigurasi awal Mitra App.
 
-
 ### 2026-11-11 · Flutter Foundation – Customer dan Mitra App
 
 - AI: GPT-6 · Fase: P1
@@ -211,6 +209,14 @@ Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelu
   2. Implementasikan alur Customer berdasarkan API Contract.
   3. Mulai fondasi UI Mitra App.
 
+### 2026-11-11 · T1 tes catch-up B-13 selesai
+
+- AI: Claude · Fase: P4 (antara P4a dan T2)
+- Selesai: 4 file tes baru (Auth 7, Catalog+Quote 8, SlotAndCreateOrder 10, TrackAndLifecycle 9 = 34 tes). `php artisan test`: 89 lulus, 655 assertion. Branch `feat/test-catchup-b13`, commit tes `eb00a17`, commit dokumen `2f7dc6c`, sudah di-push.
+- Setengah jadi: bundel ChatGPT belum dikonfirmasi diunggah. Review ChatGPT masih ditunda sampai backend selesai.
+- Keputusan baru: tidak ada.
+- Bug diketahui: dua dugaan (harga string lolos, quantity negatif) TIDAK terbukti oleh tes. Temuan kecil: GET /services/{id} tidak cek kategori aktif (usul: tangani di T3 lewat CR).
+- Berikutnya: 1) T2 P4c expiry bayar + auto-complete. 2) T3 P5 admin Blade. 3) Flutter paralel di ChatGPT.
 
 <!-- Salin blok ini untuk sesi berikutnya, tempel DI ATAS entri terbaru:
 ### YYYY-MM-DD · judul singkat
