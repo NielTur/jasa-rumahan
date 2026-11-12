@@ -2,6 +2,12 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\PropertySizeController;
+use App\Http\Controllers\Admin\PropertyTypeController;
+use App\Http\Controllers\Admin\ServiceAddonController;
+use App\Http\Controllers\Admin\ServiceCategoryController;
+use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ServicePriceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,5 +30,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::post('logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+        // Data master (T3b): daftar, tambah, ubah, Aktifkan/Nonaktifkan. SENGAJA tanpa rute hapus (B-12).
+        $master = [
+            'service-categories' => ServiceCategoryController::class,
+            'services' => ServiceController::class,
+            'property-types' => PropertyTypeController::class,
+            'property-sizes' => PropertySizeController::class,
+            'service-prices' => ServicePriceController::class,
+            'service-addons' => ServiceAddonController::class,
+        ];
+
+        foreach ($master as $uri => $controller) {
+            Route::get($uri, [$controller, 'index'])->name("$uri.index");
+            Route::get("$uri/create", [$controller, 'create'])->name("$uri.create");
+            Route::post($uri, [$controller, 'store'])->name("$uri.store");
+            Route::get("$uri/{id}/edit", [$controller, 'edit'])->whereNumber('id')->name("$uri.edit");
+            Route::put("$uri/{id}", [$controller, 'update'])->whereNumber('id')->name("$uri.update");
+            Route::patch("$uri/{id}/toggle", [$controller, 'toggle'])->whereNumber('id')->name("$uri.toggle");
+        }
     });
 });
