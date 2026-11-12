@@ -227,6 +227,33 @@ Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelu
 - Bug diketahui: dua dugaan (harga string lolos, quantity negatif) TIDAK terbukti oleh tes.
 - Berikutnya: 1) T2 P4c. 2) T3 P5 Admin Blade. 3) Flutter paralel di ChatGPT.
 
+### 2026-11-12 · T3-0 CR-16 dan T3a login admin + dashboard selesai
+
+- AI: Claude · Fase: P5 (T3a selesai)
+- Selesai: CR-16 `Service::bookable()` (jasa aktif DAN kategori aktif) di katalog, quote, slots, order, `/mitra/services`; `BookableServiceTest` 3 tes. T3a: `EnsureAdmin` (alias `admin`), `Admin\AuthController` (session, guard web, tanpa remember-me), `AdminDashboardService`, layout Bootstrap 5.3.3 lokal (`public/vendor/bootstrap`), login, dashboard; `AdminAuthTest` 5 tes, `AdminDashboardTest` 2 tes. `php artisan test`: 111 lulus, 810 assertion. Branch `feat/admin-dashboard`: commit `fc73307`, `ea0bede`, `0fdd288`.
+- Setengah jadi: T3b-T3d. Review ChatGPT ditunda sampai backend selesai.
+- Keputusan baru: CR-16 disetujui (DECISIONS §5). Bootstrap lokal (wifi lokasi demo tidak bisa diandalkan).
+- Bug diketahui: `AdminDashboardService.php` sempat salah folder (Controllers/Admin), sudah dipindah ke `app/Services`. Error 422 dari FormRequest non-ApiFormRequest tidak punya `success:false` (usulan CR-17, belum dikerjakan).
+- Berikutnya: 1) T3b CRUD katalog. 2) T3c akun dan mitra. 3) T3d order dan payment.
+
+### 2026-11-12 · Customer App Eco Green UI
+
+- AI: GPT-6 · Fase: P1 Flutter UI
+- Selesai: theme, navigasi utama, Beranda, Pesanan, Akun, widget test (perlu verifikasi lokal).
+- Setengah jadi: katalog dan seluruh alur transaksi belum terintegrasi API.
+- Keputusan baru: Customer App menggunakan desain Eco Green & Warm Neutral.
+- Bug diketahui: belum ada bug terverifikasi.
+- Berikutnya: verifikasi Flutter Analyze dan Test, lalu implementasi katalog dari API.
+
+### 2026-11-12 · T3b CRUD data master selesai
+
+- AI: Claude · Fase: P5 (T3b selesai)
+- Selesai: `Admin\MasterController` (daftar, tambah, ubah, Aktifkan/Nonaktifkan, tanpa hapus) + 6 controller turunan (kategori, jasa, jenis properti, ukuran properti, harga jasa, add-on), 2 view generik, `AdminCatalogTest` 10 tes. `php artisan test`: 121 lulus, 954 assertion. Commit `ad4f31a`, sudah di-push.
+- Setengah jadi: T3c (akun dan mitra), T3d (order dan payment). Dokumen kontrak §8/§11 dirapikan di akhir T3d.
+- Keputusan baru: tidak ada. Asumsi: nama kategori/jenis/jasa unik, durasi jasa 15-480 menit, harga integer 1-100.000.000.
+- Bug diketahui: tidak ada.
+- Berikutnya: 1) T3c. 2) T3d. 3) T4 Midtrans.
+
 <!-- Salin blok ini untuk sesi berikutnya, tempel DI ATAS entri terbaru:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>
