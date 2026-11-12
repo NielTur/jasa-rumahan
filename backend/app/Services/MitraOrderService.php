@@ -20,13 +20,23 @@ class MitraOrderService
         'finish' => [OrderStatus::MITRA_COMPLETED, 'Mitra menandai pekerjaan selesai.'],
     ];
 
-    public function __construct(private OrderStatusService $status)
-    {
+    public function __construct(
+        private OrderStatusService $status,
+        private OrderExpiryService $expiry,
+    ) {
     }
 
     // Daftar pesanan milik mitra ini. $status boleh satu atau beberapa dipisah koma: "confirmed,on_the_way"
     public function paginate(MitraProfile $mitra, ?string $status, int $perPage): LengthAwarePaginator
     {
+        // Lazy expiry (B-15): pesanan mitra ini yang menunggu bayar / menunggu konfirmasi dibereskan
+        // SEBELUM difilter, supaya hasil filter status konsisten. Cakupannya hanya milik mitra ini.
+        $this->expiry->refreshMany(
+            Order::where('mitra_id', $mitra->id)
+                ->whereIn('order_status', [OrderStatus::WAITING_PAYMENT, OrderStatus::MITRA_COMPLETED])
+                ->get()
+        );
+
         $query = Order::with(['service', 'propertySize', 'addons', 'mitra.user', 'payments'])
             ->where('mitra_id', $mitra->id); // mitra_profiles.id (B-11)
 
@@ -57,7 +67,9 @@ class MitraOrderService
             throw new ApiException('Pesanan tidak ditemukan.', 404);
         }
 
-        return $order;
+        // Lazy expiry (B-15). Dipakai juga oleh progress(), jadi order yang sudah kedaluwarsa
+        // terbaca sebagai cancelled dan aksi mitra ditolak 409.
+        return $this->expiry->refresh($order);
     }
 
     /**

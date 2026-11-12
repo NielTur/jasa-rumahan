@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OrderActionRequest;
 use App\Services\OrderAccessService;
+use App\Services\OrderExpiryService;
 use App\Support\ApiResponse;
 use App\Support\OrderStatus;
 use Illuminate\Http\JsonResponse;
@@ -12,8 +13,10 @@ use Illuminate\Http\JsonResponse;
 // Pembayaran pesanan. P4a: hanya cek status. P4b menambah pembuatan transaksi Snap di sini.
 class PaymentController extends Controller
 {
-    public function __construct(private OrderAccessService $access)
-    {
+    public function __construct(
+        private OrderAccessService $access,
+        private OrderExpiryService $expiry,
+    ) {
     }
 
     // GET /orders/{order_code}/payment?phone=08... (phone hanya untuk guest)
@@ -21,6 +24,7 @@ class PaymentController extends Controller
     public function show(OrderActionRequest $request, string $orderCode): JsonResponse
     {
         $order = $this->access->find($orderCode, $request->user('sanctum'), $request->input('phone'));
+        $order = $this->expiry->refresh($order); // lazy expiry (B-15): payment lewat batas jadi expired
         $payment = $order->payments()->orderByDesc('id')->first();
 
         return ApiResponse::success([

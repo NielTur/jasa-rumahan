@@ -10,6 +10,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\MatchingService;
 use App\Services\OrderAccessService;
+use App\Services\OrderExpiryService;
 use App\Services\OrderService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -21,6 +22,7 @@ class OrderController extends Controller
         private OrderService $orders,
         private OrderAccessService $access,
         private MatchingService $matching,
+        private OrderExpiryService $expiry,
     ) {
     }
 
@@ -45,7 +47,8 @@ class OrderController extends Controller
             $request->user('sanctum'),
             $request->input('phone')
         );
-        $order = $this->matching->refreshIfSearching($order); // lazy expiry (B-15)
+        $order = $this->matching->refreshIfSearching($order); // lazy expiry offer (B-15)
+        $order = $this->expiry->refresh($order);              // lazy expiry bayar + auto-complete (B-15)
 
         return ApiResponse::success((new OrderResource($order))->resolve());
     }
@@ -61,6 +64,7 @@ class OrderController extends Controller
             throw new ApiException('Pesanan tidak ditemukan.', 404);
         }
         $order = $this->matching->refreshIfSearching($order);
+        $order = $this->expiry->refresh($order);
 
         return ApiResponse::success((new OrderResource($order))->resolve());
     }
@@ -74,10 +78,11 @@ class OrderController extends Controller
             ->orderByDesc('id')
             ->paginate($perPage);
 
-        // Lazy expiry untuk order yang masih mencari mitra, lalu muat relasi untuk resource
+        // Lazy expiry (B-15) per order di halaman ini, lalu muat relasi untuk resource
         $page->setCollection(
             $page->getCollection()->map(function ($o) {
                 $o = $this->matching->refreshIfSearching($o);
+                $o = $this->expiry->refresh($o);
 
                 return $o->load(['service', 'propertySize', 'addons', 'mitra.user', 'payments']);
             })
@@ -95,6 +100,7 @@ class OrderController extends Controller
     {
         $order = $this->access->find($orderCode, $request->user('sanctum'), $request->query('phone'));
         $order = $this->matching->refreshIfSearching($order);
+        $order = $this->expiry->refresh($order);
 
         $rows = $order->statusHistories()
             ->orderBy('id')

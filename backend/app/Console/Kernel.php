@@ -11,7 +11,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('orders:process-expired-offers')->everyMinute();
-        // Nanti (P4): payments:expire-pending tiap menit, orders:auto-complete tiap jam
+        $schedule->command('payments:expire-pending')->everyMinute();
+        $schedule->command('orders:auto-complete')->hourly();
     }
 
     protected function commands(): void
