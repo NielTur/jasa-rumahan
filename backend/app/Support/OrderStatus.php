@@ -54,4 +54,22 @@ class OrderStatus
             default => 'searching',
         };
     }
+
+    // Label Bahasa Indonesia untuk Admin Dashboard
+    public static function label(string $status): string
+    {
+        return match ($status) {
+            self::PENDING => 'Baru dibuat',
+            self::SEARCHING_MITRA => 'Mencari mitra',
+            self::WAITING_PAYMENT => 'Menunggu pembayaran',
+            self::CONFIRMED => 'Dikonfirmasi',
+            self::ON_THE_WAY => 'Mitra menuju lokasi',
+            self::ARRIVED => 'Mitra tiba',
+            self::IN_PROGRESS => 'Sedang dikerjakan',
+            self::MITRA_COMPLETED => 'Menunggu konfirmasi customer',
+            self::COMPLETED => 'Selesai',
+            self::CANCELLED => 'Dibatalkan',
+            default => $status,
+        };
+    }
 }
