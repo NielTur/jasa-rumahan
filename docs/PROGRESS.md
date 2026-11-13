@@ -254,6 +254,22 @@ Cek keadaan sebenarnya dengan `git branch -vv` dan `git log --oneline -5` sebelu
 - Bug diketahui: tidak ada.
 - Berikutnya: 1) T3c. 2) T3d. 3) T4 Midtrans.
 
+### 2026-11-13 · T3d pesanan dan pembayaran admin selesai (P5 selesai)
+
+- AI: Claude · Fase: P5 selesai
+- Selesai: `AdminOrderService` (daftar dan detail pesanan, paksa selesai dari `mitra_completed` lewat `OrderStatusService`, daftar pembayaran, tandai refunded/refund_failed dengan urutan kunci order lalu payment), `PaymentStatus`, `Admin\OrderController`, `Admin\PaymentController`, 3 partial, 3 view, `AdminOrderTest` 8 tes. `php artisan test`: 135 lulus, 1158 assertion. Branch `feat/admin-dashboard`, commit `4b14a7f`, sudah di-push.
+- Setengah jadi: uji manual alur admin lewat Postman + browser belum dilakukan. Review ChatGPT ditunda sampai backend selesai. Edit `PROGRESS.md` di dua branch (backend dan Flutter) bisa konflik saat merge.
+- Keputusan baru: tidak ada. Asumsi: paksa selesai hanya dari `mitra_completed`; refund_failed boleh ditandai refunded; admin tidak bisa membatalkan pesanan dari dashboard (di luar plan).
+- Bug diketahui: tidak ada.
+- Berikutnya: 1) T4 P4b Midtrans Sandbox (butuh akun Sandbox dan ngrok). 2) T5 P6 hardening. 3) Flutter paralel di worktree `jasa-rumahan-flutter`.
+
+### 2026-11-13 · T3c akun dan mitra admin selesai
+
+- AI: Claude · Fase: P5 (T3c)
+- Selesai: `AdminAccountService`, `Admin\UserController` (suspend dan aktifkan akun, suspend mencabut token Sanctum, akun admin dikunci), `Admin\MitraController` (setujui dan tolak), 2 view, `AdminAccountTest` 6 tes. 127 lulus, 1037 assertion. Commit `142e023` (cherry-pick dari `5d2d594`, sempat nyasar ke branch Flutter) dan `e4caf52`.
+- Keputusan baru: backend dikerjakan di folder `jasa-rumahan` (selalu `feat/admin-dashboard`), Flutter di worktree `jasa-rumahan-flutter` (`feat/customer-eco-green`).
+- Berikutnya: T3d.
+
 <!-- Salin blok ini untuk sesi berikutnya, tempel DI ATAS entri terbaru:
 ### YYYY-MM-DD · judul singkat
 - AI: <nama> · Fase: <P?>
