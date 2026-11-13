@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MitraController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PropertySizeController;
 use App\Http\Controllers\Admin\PropertyTypeController;
 use App\Http\Controllers\Admin\ServiceAddonController;
@@ -60,5 +62,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('mitra', [MitraController::class, 'index'])->name('mitra.index');
         Route::patch('mitra/{id}/verification', [MitraController::class, 'updateVerification'])
             ->whereNumber('id')->name('mitra.verification');
+
+        // Pesanan dan pembayaran (T3d)
+        Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{id}', [OrderController::class, 'show'])->whereNumber('id')->name('orders.show');
+        Route::post('orders/{id}/force-complete', [OrderController::class, 'forceComplete'])
+            ->whereNumber('id')->name('orders.force-complete');
+
+        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        Route::patch('payments/{id}/refund', [PaymentController::class, 'updateRefund'])
+            ->whereNumber('id')->name('payments.refund');
     });
 });
