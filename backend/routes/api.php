@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Mitra\ServiceController;
 use App\Http\Controllers\Api\OrderActionController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\MidtransWebhookController;
 use App\Http\Controllers\Api\QuoteController;
 use App\Http\Controllers\Api\SlotController;
 use Illuminate\Support\Facades\Route;
@@ -43,7 +44,9 @@ Route::get('orders/{order_code}/status-history', [OrderController::class, 'histo
 // P4a: aksi customer/guest pada satu pesanan (guest kirim phone, akses dicek OrderAccessService)
 Route::post('orders/{order_code}/cancel', [OrderActionController::class, 'cancel']);
 Route::post('orders/{order_code}/confirm-completion', [OrderActionController::class, 'confirmCompletion']);
+Route::post('orders/{order_code}/payments', [PaymentController::class, 'store'])->middleware('throttle:10,1');
 Route::get('orders/{order_code}/payment', [PaymentController::class, 'show']);
+Route::post('webhooks/midtrans', MidtransWebhookController::class);
 
 // Khusus customer login
 Route::middleware(['auth:sanctum', 'role:customer'])->group(function () {

@@ -19,7 +19,9 @@ class CatalogController extends Controller
 {
     public function categories(): JsonResponse
     {
-        $data = ServiceCategory::where('is_active', true)->orderBy('id')->get();
+        $data = ServiceCategory::where('is_active', true)
+            ->orderBy('id')
+            ->get();
 
         return ApiResponse::success(
             $data->map(fn($c) => (new ServiceCategoryResource($c))->resolve())->all()
@@ -29,11 +31,16 @@ class CatalogController extends Controller
     public function services(Request $request): JsonResponse
     {
         $data = Service::bookable()
-            ->when($request->filled('category_id'), fn($q) => $q->where('category_id', $request->integer('category_id')))
+            ->when(
+                $request->filled('category_id'),
+                fn($q) => $q->where('category_id', $request->integer('category_id'))
+            )
             ->orderBy('id')
             ->get();
 
-        return ApiResponse::success($data);
+        return ApiResponse::success(
+            $data->map(fn($service) => (new ServiceResource($service))->resolve())->all()
+        );
     }
 
     public function showService(int $id): JsonResponse
