@@ -14,7 +14,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('payments:expire-pending')->everyMinute();
         $schedule->command('orders:auto-complete')->hourly();
     }
-
     protected function commands(): void
     {
         $this->load(__DIR__ . '/Commands');

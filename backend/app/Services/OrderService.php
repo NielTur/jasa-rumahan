@@ -36,7 +36,7 @@ class OrderService
             (int) $data['property_size_id'],
             $data['addons'] ?? []
         );
-        $service = Service::findOrFail($data['service_id']);
+        $service = Service::bookable()->findOrFail($data['service_id']);
 
         // 2. Jadwal: harus tepat salah satu slot, cukup jauh dari sekarang, dan ada mitra eligible
         $scheduledAt = Carbon::parse($data['scheduled_at'])->setTimezone(config('app.timezone'));

@@ -23,12 +23,11 @@ class Service extends Model
         'is_active' => 'boolean',
     ];
 
-    // CR-16: jasa yang boleh tampil dan dipesan = jasa aktif DAN kategorinya aktif.
-    // Dipakai di katalog, quote, slots, buat order, dan pilihan jasa mitra.
+    // Jasa dapat ditampilkan/dipesan hanya jika jasa dan kategorinya sama-sama aktif.
     public function scopeBookable(Builder $query): Builder
     {
         return $query->where('services.is_active', true)
-            ->whereHas('category', fn($c) => $c->where('is_active', true));
+            ->whereHas('category', fn($q) => $q->where('is_active', true));
     }
 
     public function category(): BelongsTo

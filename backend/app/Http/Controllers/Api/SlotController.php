@@ -20,7 +20,7 @@ class SlotController extends Controller
 
     public function index(SlotRequest $request): JsonResponse
     {
-        $service = Service::bookable()->where('id', $request->integer('service_id'))->first();
+        $service = Service::bookable()->whereKey($request->integer('service_id'))->first();
         if (!$service) {
             throw new ApiException('Jasa tidak ditemukan atau sedang tidak aktif.', 404);
         }

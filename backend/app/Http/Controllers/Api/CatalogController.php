@@ -15,7 +15,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 // Katalog publik (tanpa login). Hanya data aktif yang tampil.
-// Jasa tampil hanya kalau jasa aktif DAN kategorinya aktif (CR-16, Service::bookable()).
 class CatalogController extends Controller
 {
     public function categories(): JsonResponse
@@ -34,9 +33,7 @@ class CatalogController extends Controller
             ->orderBy('id')
             ->get();
 
-        return ApiResponse::success(
-            $data->map(fn($s) => (new ServiceResource($s))->resolve())->all()
-        );
+        return ApiResponse::success($data);
     }
 
     public function showService(int $id): JsonResponse

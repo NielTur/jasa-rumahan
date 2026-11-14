@@ -47,8 +47,7 @@ class OrderController extends Controller
             $request->user('sanctum'),
             $request->input('phone')
         );
-        $order = $this->matching->refreshIfSearching($order); // lazy expiry offer (B-15)
-        $order = $this->expiry->refresh($order);              // lazy expiry bayar + auto-complete (B-15)
+        $order = $this->refreshForRead($order); // lazy matching + expiry (B-15)
 
         return ApiResponse::success((new OrderResource($order))->resolve());
     }
@@ -63,8 +62,7 @@ class OrderController extends Controller
         if (!$order) {
             throw new ApiException('Pesanan tidak ditemukan.', 404);
         }
-        $order = $this->matching->refreshIfSearching($order);
-        $order = $this->expiry->refresh($order);
+        $order = $this->refreshForRead($order);
 
         return ApiResponse::success((new OrderResource($order))->resolve());
     }
@@ -78,11 +76,10 @@ class OrderController extends Controller
             ->orderByDesc('id')
             ->paginate($perPage);
 
-        // Lazy expiry (B-15) per order di halaman ini, lalu muat relasi untuk resource
+        // Lazy expiry untuk order yang masih mencari mitra, lalu muat relasi untuk resource
         $page->setCollection(
             $page->getCollection()->map(function ($o) {
-                $o = $this->matching->refreshIfSearching($o);
-                $o = $this->expiry->refresh($o);
+                $o = $this->refreshForRead($o);
 
                 return $o->load(['service', 'propertySize', 'addons', 'mitra.user', 'payments']);
             })
@@ -99,8 +96,7 @@ class OrderController extends Controller
     public function history(Request $request, string $orderCode): JsonResponse
     {
         $order = $this->access->find($orderCode, $request->user('sanctum'), $request->query('phone'));
-        $order = $this->matching->refreshIfSearching($order);
-        $order = $this->expiry->refresh($order);
+        $order = $this->refreshForRead($order);
 
         $rows = $order->statusHistories()
             ->orderBy('id')
@@ -116,4 +112,12 @@ class OrderController extends Controller
 
         return ApiResponse::success($rows);
     }
+    // Endpoint baca membereskan offer pencarian mitra serta expiry pembayaran/auto-complete.
+    private function refreshForRead(Order $order): Order
+    {
+        $order = $this->matching->refreshIfSearching($order);
+
+        return $this->expiry->refresh($order);
+    }
+
 }

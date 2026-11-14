@@ -10,6 +10,16 @@
 
 ---
 
+## Catatan status implementasi (14 Nov 2026)
+
+Dokumen ini tetap menjadi rancangan domain dan struktur database kelompok. Status implementasi terbaru perlu dibaca bersama `docs/PROGRESS.md`, `docs/API_CONTRACT.md`, dan `docs/DECISIONS.md`. Pemilik proyek menetapkan ZIP sebagai versi baru dan GitHub sebagai versi lama; ChatGPT kini menjadi AI utama untuk pengerjaan Backend Laravel. Scope saat ini backend saja—Flutter tidak disentuh.
+
+Berdasarkan output `php artisan test` yang diberikan pemilik pada 14 Nov 2026, suite backend berisi 135 tests: 100 passed dan 35 failed (768 assertions). Kegagalan yang teramati mencakup alias middleware Admin, redirect login Admin, akses jasa pada kategori nonaktif, HTTP 500 pada endpoint jasa mitra, serta expiry dan auto-complete pesanan. Ini catatan kondisi implementasi, bukan perubahan rancangan bisnis. Rincian dan urutan pemulihan dicatat di `PROGRESS.md`.
+
+File Python yang disebut ada di ZIP adalah artefak eksperimen/test Qwenn yang belum diketahui fungsinya; tidak diasumsikan bagian dari sistem marketplace.
+
+---
+
 ## Daftar Isi
 
 1. [Gambaran Umum Sistem](#1-gambaran-umum-sistem)

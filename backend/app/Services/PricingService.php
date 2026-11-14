@@ -18,8 +18,7 @@ class PricingService
      */
     public function quote(int $serviceId, int $propertySizeId, array $addons = []): array
     {
-        // CR-16: jasa aktif DAN kategorinya aktif
-        $service = Service::bookable()->where('id', $serviceId)->first();
+        $service = Service::bookable()->whereKey($serviceId)->first();
         if (!$service) {
             throw new ApiException('Jasa tidak ditemukan atau sedang tidak aktif.', 422);
         }
