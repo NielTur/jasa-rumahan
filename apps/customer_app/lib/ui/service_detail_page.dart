@@ -101,13 +101,19 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
           height: 52,
           child: FilledButton(
             onPressed: canBook
-                ? () {
-                    Navigator.push(
+                ? () async {
+                    final result = await Navigator.push<OrderResult>(
                       context,
                       MaterialPageRoute(
                         builder: (_) => BookingPage(detail: detail),
                       ),
                     );
+
+                    if (!mounted) return;
+
+                    if (result != null) {
+                      Navigator.pop(context, result);
+                    }
                   }
                 : null,
             style: FilledButton.styleFrom(

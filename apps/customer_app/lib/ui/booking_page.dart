@@ -343,13 +343,16 @@ class _BookingPageState extends State<BookingPage> {
             FilledButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                Navigator.of(context).pop();
               },
-              child: const Text('Selesai'),
+              child: const Text('Lihat Pesanan'),
             ),
           ],
         ),
       );
+
+      if (!mounted) return;
+
+      Navigator.of(context).pop(result);
     } on ApiException catch (error) {
       if (!mounted) return;
 
@@ -491,7 +494,7 @@ class _BookingPageState extends State<BookingPage> {
         children: [
           _fieldLabel('Jenis properti'),
           DropdownButtonFormField<int>(
-            value: _selectedGroupId,
+            initialValue: _selectedGroupId,
             isExpanded: true,
             decoration: _inputDecoration('Pilih jenis properti'),
             items: _priceGroups.map((group) {
@@ -511,7 +514,7 @@ class _BookingPageState extends State<BookingPage> {
             )
           else
             DropdownButtonFormField<int>(
-              value: _selectedSize?.propertySizeId,
+              initialValue: _selectedSize?.propertySizeId,
               isExpanded: true,
               decoration: _inputDecoration('Pilih ukuran properti'),
               items: group.sizes.map((size) {

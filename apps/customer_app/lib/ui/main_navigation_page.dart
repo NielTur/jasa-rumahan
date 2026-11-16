@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:core/core.dart';
 
 import '../service/catalog_service.dart';
 import 'account_page.dart';
@@ -16,12 +17,23 @@ class MainNavigationPage extends StatefulWidget {
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
+  OrderResult? _latestOrder;
+
+  void _handleOrderCreated(OrderResult result) {
+    setState(() {
+      _latestOrder = result;
+      _selectedIndex = 1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(catalogService: widget.catalogService),
-      const OrdersPage(),
+      HomePage(
+        catalogService: widget.catalogService,
+        onOrderCreated: _handleOrderCreated,
+      ),
+      OrdersPage(orderResult: _latestOrder),
       const AccountPage(),
     ];
 
@@ -30,7 +42,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
+          setState(() {
+            _selectedIndex = index;
+          });
         },
         destinations: const [
           NavigationDestination(

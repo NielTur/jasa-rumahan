@@ -7,8 +7,9 @@ import 'widgets/catalog_widgets.dart';
 
 class HomePage extends StatefulWidget {
   final CatalogService? catalogService;
+  final ValueChanged<OrderResult>? onOrderCreated;
 
-  const HomePage({super.key, this.catalogService});
+  const HomePage({super.key, this.catalogService, this.onOrderCreated});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -225,7 +226,10 @@ class _HomePageState extends State<HomePage> {
           .map(
             (service) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: ServiceTile(service: service),
+              child: ServiceTile(
+                service: service,
+                onOrderCreated: widget.onOrderCreated,
+              ),
             ),
           )
           .toList(),

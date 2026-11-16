@@ -47,12 +47,13 @@ class WelcomeBanner extends StatelessWidget {
 }
 
 class ServiceTile extends StatelessWidget {
-  const ServiceTile({super.key, required this.service});
+  const ServiceTile({super.key, required this.service, this.onOrderCreated});
 
   final ServiceItem service;
+  final ValueChanged<OrderResult>? onOrderCreated;
 
-  void _openDetail(BuildContext context) {
-    Navigator.push(
+  Future<void> _openDetail(BuildContext context) async {
+    final result = await Navigator.push<OrderResult>(
       context,
       MaterialPageRoute(
         builder: (_) => ServiceDetailPage(
@@ -61,6 +62,10 @@ class ServiceTile extends StatelessWidget {
         ),
       ),
     );
+
+    if (result != null) {
+      onOrderCreated?.call(result);
+    }
   }
 
   @override
