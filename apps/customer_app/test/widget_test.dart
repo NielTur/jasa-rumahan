@@ -1,9 +1,36 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:core/core.dart';
 import 'package:customer_app/main.dart';
+import 'package:customer_app/service/catalog_service.dart';
+
+class FakeCatalogService extends CatalogService {
+  @override
+  Future<List<ServiceCategory>> getCategories() async {
+    return const [ServiceCategory(id: 1, categoryName: 'Perawatan Rumah')];
+  }
+
+  @override
+  Future<List<ServiceItem>> getServices({int? categoryId}) async {
+    return const [
+      ServiceItem(
+        id: 1,
+        categoryId: 1,
+        serviceName: 'Bersih-bersih rumah',
+        durationMinutes: 120,
+      ),
+    ];
+  }
+}
 
 void main() {
+  Widget createTestApp() {
+    return MyApp(catalogService: FakeCatalogService());
+  }
+
   testWidgets('Customer App menampilkan halaman beranda', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(createTestApp());
+    await tester.pumpAndSettle();
 
     expect(find.text('Pilih layanan'), findsOneWidget);
     expect(find.text('Bersih-bersih rumah'), findsOneWidget);
@@ -11,7 +38,9 @@ void main() {
   });
 
   testWidgets('Navigasi membuka halaman pesanan', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(createTestApp());
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Pesanan'));
     await tester.pumpAndSettle();
 
@@ -19,7 +48,9 @@ void main() {
   });
 
   testWidgets('Navigasi membuka halaman akun', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(createTestApp());
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Akun'));
     await tester.pumpAndSettle();
 

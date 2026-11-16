@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 
 import '../model/user_info.dart';
@@ -9,7 +10,9 @@ class ApiClient {
       BaseOptions(
         baseUrl: const String.fromEnvironment(
           'API_BASE_URL',
-          defaultValue: 'http://10.0.2.2:8000/api',
+          defaultValue: kIsWeb
+              ? 'http://localhost:8000/api'
+              : 'http://10.0.2.2:8000/api',
         ),
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../service/catalog_service.dart';
 import 'account_page.dart';
 import 'home_page.dart';
 import 'orders_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
-  const MainNavigationPage({super.key});
+  final CatalogService? catalogService;
+
+  const MainNavigationPage({super.key, this.catalogService});
 
   @override
   State<MainNavigationPage> createState() => _MainNavigationPageState();
@@ -14,12 +17,16 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
 
-  static const _pages = [HomePage(), OrdersPage(), AccountPage()];
-
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      HomePage(catalogService: widget.catalogService),
+      const OrdersPage(),
+      const AccountPage(),
+    ];
+
     return Scaffold(
-      body: IndexedStack(index: _selectedIndex, children: _pages),
+      body: IndexedStack(index: _selectedIndex, children: pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {

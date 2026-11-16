@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 
 import 'theme/app_theme.dart';
 import 'ui/main_navigation_page.dart';
+import 'service/catalog_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +12,9 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final CatalogService? catalogService;
+
+  const MyApp({super.key, this.catalogService});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'JasaRumahan',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const MainNavigationPage(),
+      home: MainNavigationPage(catalogService: catalogService),
     );
   }
 }
