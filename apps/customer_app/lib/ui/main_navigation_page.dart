@@ -17,11 +17,11 @@ class MainNavigationPage extends StatefulWidget {
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
-  OrderResult? _latestOrder;
+  int _ordersRefreshKey = 0;
 
   void _handleOrderCreated(OrderResult result) {
     setState(() {
-      _latestOrder = result;
+      _ordersRefreshKey++;
       _selectedIndex = 1;
     });
   }
@@ -33,7 +33,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         catalogService: widget.catalogService,
         onOrderCreated: _handleOrderCreated,
       ),
-      OrdersPage(orderResult: _latestOrder),
+      OrdersPage(refreshKey: _ordersRefreshKey),
       const AccountPage(),
     ];
 
