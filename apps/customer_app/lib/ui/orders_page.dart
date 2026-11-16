@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 
 import '../service/order_history_service.dart';
 import '../theme/app_colors.dart';
+import 'order_detail_page.dart';
 
 class OrdersPage extends StatefulWidget {
   final int refreshKey;
@@ -18,6 +19,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   List<Map<String, dynamic>> _orders = [];
   bool _isLoading = true;
+  bool _isLoggedIn = false;
   String? _errorMessage;
 
   @override
@@ -41,11 +43,15 @@ class _OrdersPageState extends State<OrdersPage> {
     });
 
     try {
+      final token = await UserInfo.getToken();
+      final loggedIn = token != null && token.isNotEmpty;
+
       final orders = await _service.getOrders();
       if (!mounted) return;
 
       setState(() {
         _orders = orders;
+        _isLoggedIn = loggedIn;
         _isLoading = false;
       });
     } on ApiException catch (error) {
@@ -90,9 +96,11 @@ class _OrdersPageState extends State<OrdersPage> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Pantau pesanan jasa rumahanmu di sini.',
-              style: TextStyle(color: AppColors.mutedStone),
+            Text(
+              _isLoggedIn
+                  ? 'Riwayat pesanan akunmu dari server.'
+                  : 'Pesanan tersimpan di perangkat ini saja.',
+              style: const TextStyle(color: AppColors.mutedStone, fontSize: 13),
             ),
             const SizedBox(height: 18),
             Expanded(child: _buildContent()),
@@ -126,25 +134,27 @@ class _OrdersPageState extends State<OrdersPage> {
     }
 
     if (_orders.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.receipt_long_outlined,
               size: 58,
               color: AppColors.sageFresh,
             ),
-            SizedBox(height: 14),
-            Text(
+            const SizedBox(height: 14),
+            const Text(
               'Belum ada pesanan',
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             Text(
-              'Pesanan yang kamu buat akan muncul di sini.',
+              _isLoggedIn
+                  ? 'Pesanan yang kamu buat akan muncul di sini.'
+                  : 'Pesanan guest tersimpan lokal di perangkat ini.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.mutedStone),
+              style: const TextStyle(color: AppColors.mutedStone),
             ),
           ],
         ),
@@ -155,8 +165,26 @@ class _OrdersPageState extends State<OrdersPage> {
       onRefresh: _loadOrders,
       child: ListView.separated(
         itemCount: _orders.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (context, index) => _buildOrderCard(_orders[index]),
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final order = _orders[index];
+          final orderCode = order['order_code']?.toString() ?? '';
+
+          return InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: orderCode.isEmpty
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => OrderDetailPage(orderCode: orderCode),
+                      ),
+                    );
+                  },
+            child: _buildOrderCard(order),
+          );
+        },
       ),
     );
   }
@@ -228,8 +256,8 @@ class _OrdersPageState extends State<OrdersPage> {
     final color = isCancelled
         ? AppColors.coralDanger
         : isDone
-        ? AppColors.emeraldActive
-        : AppColors.amberWarning;
+            ? AppColors.emeraldActive
+            : AppColors.amberWarning;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
