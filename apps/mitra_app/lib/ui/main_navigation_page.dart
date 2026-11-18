@@ -1,15 +1,15 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 import 'dashboard_page.dart';
+import 'offers_page.dart';
+import 'orders_page.dart';
 import 'profile_page.dart';
 import 'services_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final AuthUser user;
   final Future<void> Function() onLogout;
-
   const MainNavigationPage({
     super.key,
     required this.user,
@@ -22,13 +22,20 @@ class MainNavigationPage extends StatefulWidget {
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
-
-  static const List<String> _titles = ['Beranda', 'Layanan', 'Profil'];
+  static const _titles = [
+    'Beranda',
+    'Penawaran',
+    'Pesanan',
+    'Layanan',
+    'Profil',
+  ];
 
   @override
   Widget build(BuildContext context) {
     final pages = [
       DashboardPage(user: widget.user),
+      const OffersPage(),
+      const OrdersPage(),
       const ServicesPage(),
       const ProfilePage(),
     ];
@@ -48,14 +55,23 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       body: IndexedStack(index: _selectedIndex, children: pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
-        },
+        onDestinationSelected: (index) =>
+            setState(() => _selectedIndex = index),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_work_outlined),
             selectedIcon: Icon(Icons.home_work_rounded),
             label: 'Beranda',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.notifications_active_outlined),
+            selectedIcon: Icon(Icons.notifications_active_rounded),
+            label: 'Tawaran',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.assignment_outlined),
+            selectedIcon: Icon(Icons.assignment_rounded),
+            label: 'Pesanan',
           ),
           NavigationDestination(
             icon: Icon(Icons.handyman_outlined),

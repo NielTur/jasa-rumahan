@@ -11,3 +11,5 @@ export 'model/order_quote.dart';
 export 'model/order_result.dart';
 export 'model/auth_user.dart';
 export 'model/auth_session.dart';
+export 'model/mitra_offer.dart';
+export 'model/mitra_order.dart';
