@@ -3,19 +3,36 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF176B57);
-  static const Color primaryDark = Color(0xFF104C3E);
-  static const Color secondary = Color(0xFF4C8C78);
+  // Primary palette
+  static const Color forestDeep = Color(0xFF1B4332);
+  static const Color emeraldActive = Color(0xFF2D6A4F);
+  static const Color sageFresh = Color(0xFF52B788);
+  static const Color mintTint = Color(0xFFD8F3DC);
 
-  static const Color background = Color(0xFFF7F9F8);
-  static const Color surface = Color(0xFFFFFFFF);
+  // Background and surface
+  static const Color canvasCream = Color(0xFFFAF8F5);
+  static const Color surfaceSand = Color(0xFFF2EDE4);
+  static const Color borderHairline = Color(0xFFE9E3D8);
 
-  static const Color textPrimary = Color(0xFF202B27);
-  static const Color textSecondary = Color(0xFF68756F);
+  // Text
+  static const Color charcoalSlate = Color(0xFF1A2E26);
+  static const Color mutedStone = Color(0xFF607268);
 
-  static const Color success = Color(0xFF2E7D32);
-  static const Color warning = Color(0xFFED9B22);
-  static const Color error = Color(0xFFC62828);
+  // Status and payment
+  static const Color amberWarning = Color(0xFFD97706);
+  static const Color coralDanger = Color(0xFFDC2626);
+  static const Color blueMidtrans = Color(0xFF002855);
 
-  static const Color border = Color(0xFFE0E7E3);
+  // Compatibility alias untuk halaman autentikasi yang sudah ada.
+  static const Color primary = forestDeep;
+  static const Color primaryDark = forestDeep;
+  static const Color secondary = emeraldActive;
+  static const Color background = canvasCream;
+  static const Color surface = Colors.white;
+  static const Color textPrimary = charcoalSlate;
+  static const Color textSecondary = mutedStone;
+  static const Color success = emeraldActive;
+  static const Color warning = amberWarning;
+  static const Color error = coralDanger;
+  static const Color border = borderHairline;
 }

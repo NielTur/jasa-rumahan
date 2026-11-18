@@ -61,4 +61,12 @@ class ApiClient {
       throw ApiException.fromDioException(error);
     }
   }
+
+  Future<Response<dynamic>> put(String path, {dynamic data}) async {
+    try {
+      return await _dio.put(path, data: data);
+    } on DioException catch (error) {
+      throw ApiException.fromDioException(error);
+    }
+  }
 }
