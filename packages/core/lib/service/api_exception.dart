@@ -15,17 +15,16 @@ class ApiException implements Exception {
     final statusCode = exception.response?.statusCode;
     final responseData = exception.response?.data;
 
-    String message = 'Terjadi kesalahan. Silakan coba lagi.';
+    String? serverMessage;
     Map<String, List<String>> errors = {};
 
     if (responseData is Map) {
       final responseMessage = responseData['message'];
 
       if (responseMessage is String && responseMessage.isNotEmpty) {
-        message = responseMessage;
+        serverMessage = responseMessage;
       }
 
-      // Format errors API: Map<String, List<String>>.
       final responseErrors = responseData['errors'];
 
       if (responseErrors is Map) {
@@ -42,29 +41,11 @@ class ApiException implements Exception {
       }
     }
 
-    switch (statusCode) {
-      case 401:
-        message = 'Sesi berakhir. Silakan login kembali.';
-        break;
-      case 403:
-        message = 'Kamu tidak memiliki akses untuk tindakan ini.';
-        break;
-      case 404:
-        message = 'Data yang dicari tidak ditemukan.';
-        break;
-      case 409:
-        message = 'Permintaan tidak dapat diproses karena konflik data.';
-        break;
-      case 422:
-        message = 'Data yang dikirim tidak valid.';
-        break;
-      case 429:
-        message = 'Terlalu banyak permintaan. Silakan tunggu.';
-        break;
-    }
+    // Pesan backend diprioritaskan agar detail kesalahan tidak hilang.
+    String message = serverMessage ?? _fallbackMessage(statusCode);
 
     if (statusCode != null && statusCode >= 500) {
-      message = 'Server sedang mengalami gangguan.';
+      message = serverMessage ?? 'Server sedang mengalami gangguan.';
     }
 
     if (exception.type == DioExceptionType.connectionTimeout ||
@@ -80,6 +61,25 @@ class ApiException implements Exception {
       statusCode: statusCode,
       errors: errors,
     );
+  }
+
+  static String _fallbackMessage(int? statusCode) {
+    switch (statusCode) {
+      case 401:
+        return 'Sesi berakhir. Silakan login kembali.';
+      case 403:
+        return 'Kamu tidak memiliki akses untuk tindakan ini.';
+      case 404:
+        return 'Data yang dicari tidak ditemukan.';
+      case 409:
+        return 'Permintaan tidak dapat diproses karena konflik data.';
+      case 422:
+        return 'Data yang dikirim tidak valid.';
+      case 429:
+        return 'Terlalu banyak permintaan. Silakan tunggu.';
+      default:
+        return 'Terjadi kesalahan. Silakan coba lagi.';
+    }
   }
 
   @override

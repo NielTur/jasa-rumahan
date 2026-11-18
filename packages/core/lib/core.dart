@@ -9,3 +9,5 @@ export 'model/customer_profile.dart';
 export 'model/booking_slot.dart';
 export 'model/order_quote.dart';
 export 'model/order_result.dart';
+export 'model/auth_user.dart';
+export 'model/auth_session.dart';
