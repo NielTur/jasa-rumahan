@@ -1,8 +1,10 @@
+// apps/customer_app/test/widget_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:core/core.dart';
 import 'package:customer_app/main.dart';
 import 'package:customer_app/service/catalog_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeCatalogService extends CatalogService {
   @override
@@ -24,6 +26,12 @@ class FakeCatalogService extends CatalogService {
 }
 
 void main() {
+  // Penyimpanan lokal dipalsukan supaya halaman Pesanan tidak menunggu
+  // SharedPreferences asli (yang tidak tersedia di lingkungan tes).
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   Widget createTestApp() {
     return MyApp(catalogService: FakeCatalogService());
   }
@@ -54,6 +62,6 @@ void main() {
     await tester.tap(find.text('Akun'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pengguna tamu'), findsOneWidget);
+    expect(find.text('Pengguna Tamu'), findsOneWidget);
   });
 }
